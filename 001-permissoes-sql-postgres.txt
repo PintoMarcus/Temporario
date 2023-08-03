@@ -1,0 +1,43 @@
+--criando permissões de leitura
+GRANT USAGE ON SCHEMA dbo TO db_datareader;
+GRANT SELECT ON ALL TABLES IN SCHEMA dbo TO db_datareader;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA dbo TO db_datareader;
+
+
+
+
+-- criando permissões de escrita:
+GRANT USAGE ON SCHEMA dbo TO db_datawriter;
+GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA dbo TO db_datawriter;
+GRANT UPDATE ON ALL SEQUENCES IN SCHEMA dbo TO db_datawriter;
+
+-- criando permissões de execute em procedures e funções
+GRANT USAGE ON SCHEMA dbo TO db_execute;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA dbo TO db_execute;
+GRANT EXECUTE ON ALL PROCEDURES IN SCHEMA dbo TO db_execute;
+
+
+
+--permissões owner em dev / qas
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA dbo TO db_owner;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA dbo TO db_owner;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA dbo TO db_owner;
+GRANT ALL PRIVILEGES ON ALL PROCEDURES IN SCHEMA dbo TO db_owner;
+
+
+--permissões owner em dev / qas
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA dbo TO db_owner;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA dbo TO db_owner;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA dbo TO db_owner;
+GRANT ALL PRIVILEGES ON ALL PROCEDURES IN SCHEMA dbo TO db_owner;
+
+
+
+----
+-- Primeiro, conceda todas as permissões no schema dbo para a role db_all
+GRANT ALL PRIVILEGES ON SCHEMA dbo TO db_all;
+
+-- Em seguida, revogue a permissão de conceder privilégios para a role db_all
+REVOKE GRANT OPTION FOR ALL ON SCHEMA dbo FROM db_all;

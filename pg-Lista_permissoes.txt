@@ -1,0 +1,19 @@
+/*
+Você pode usar a função "pg_namespace.nspname" para listar os esquemas e a função "pg_roles.rolname" para listar as roles. A seguinte consulta irá listar todas as permissões de acesso a esquemas para a role "role_leitura" e o usuário "jhon_doe":
+*/
+SELECT rolname, nspname
+FROM pg_namespace
+JOIN pg_auth_members ON (pg_namespace.oid = pg_auth_members.member)
+JOIN pg_roles ON (pg_roles.oid = pg_auth_members.roleid)
+WHERE rolname IN ('role_leitura', 'jhon_doe');
+
+
+/*
+Se você deseja listar as permissões de acesso a todos os objetos, você pode usar a função "pg_has_role()" para verificar se o usuário ou a role possui acesso a um determinado objeto.
+
+Esta consulta irá mostrar todos os objetos (tabelas, índices, etc.) nos esquemas dos bancos de dados, onde a role ou o usuário possui permissão de uso.
+*/
+SELECT rolname, nspname, relname, relkind
+FROM pg_class
+JOIN pg_namespace ON (pg_class.relnamespace = pg_namespace.oid)
+WHERE pg_has_role(rolname, 'USAGE', 'schema'::text, nspname)

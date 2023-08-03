@@ -1,0 +1,5 @@
+-- tempo que o servidor está up
+select current_timestamp - pg_postmaster_start_time() as uptime
+
+--criação da tabela
+select last_autoanalyze from pg_stat_user_tables where relname like 'nometabela';

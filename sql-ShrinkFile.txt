@@ -1,0 +1,301 @@
+-- Processo para equalização dos datafiles será realizado da seguinte forma:
+--00 - Determinar tamanho máximo dos arquvios - valor retirado da média de MB em uso de cada datafiles
+--01 - Fazer o shirnk dos arquvios para o tamanho estimado
+--02 - Desabilitar o FILEGROWTH
+--03 - Fazer o shrink do Arquivo "alvo" com a opção EMPTYFILE, isso fará a redistribuição dos dados
+--04 - Fazer novo shrink do alvo para o size correto e Habilitar o FILEGROWTH dos arquivos
+
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[DBMonitoraShrinkFile](
+	[id_DBMonitoraShrinkFile] [bigint] IDENTITY(1,1) NOT NULL,
+	[DataExecucao] [datetime] NOT NULL,
+	[NomeBanco] [sysname] NOT NULL,
+	[NomeDatafile] [sysname] NOT NULL,
+	[PhysicalDatafile] [sysname] NOT NULL,
+	[Comando] [nvarchar](4000) NOT NULL,
+	[Observacao] [nvarchar](4000) NULL
+) ON [PRIMARY]
+GO
+
+
+
+USE Arquivo
+GO
+
+SET NOCOUNT ON;
+DECLARE @vError INT;
+DECLARE @vErrorMessage NVARCHAR(4000);
+DECLARE @vErrorMessageOriginal NVARCHAR(4000);
+DECLARE @ShrinkFileCommandSQL NVARCHAR(4000);
+DECLARE @Name_DB SYSNAME;
+DECLARE @Name_File_Logical SYSNAME;
+DECLARE @Name_File_Physical SYSNAME;
+DECLARE @NewValueMB VARCHAR(10);
+
+/* 001 - REALIZA SHRINK DOS DEMAIS ARQUIVOS (ARQUIVOS NÃO ALVO) */
+SET @Name_DB = 'Arquivo';
+SET @Name_File_Logical = 'Arquivo_02';
+SET @Name_File_Physical = 'X:\caminho\Arquivo\Arquivo_02.ndf';
+SET @NewValueMB = '2378';
+SET @ShrinkFileCommandSQL = 'DBCC SHRINKFILE (''' + @Name_File_Logical + ''', '+ @NewValueMB +')';
+----- Executa e loga Shrinkfile
+   BEGIN TRY 
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '1-Início file 1 da etapa 01');
+      PRINT @ShrinkFileCommandSQL;
+      EXEC ( @ShrinkFileCommandSQL ) ;
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '2-Fim file 1 da etapa 01');
+   END TRY
+   BEGIN CATCH
+      SELECT error_message() [errmsg], error_severity() [severity], error_state() [state]
+           , error_number() [errno], error_procedure() [proc], error_line() [lineno];
+      SET @vError = ERROR_NUMBER();
+      SET @vErrorMessageOriginal = ERROR_MESSAGE();
+      SET @vErrorMessage = '8-Msg Error : ' + CAST(@vError AS nvarchar) + ', ' + ISNULL(@vErrorMessageOriginal,'');
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, @vErrorMessage);
+   END CATCH
+   
+   
+SET @Name_DB = 'Arquivo';   
+SET @Name_File_Logical = 'Arquivo_03';
+SET @Name_File_Physical = 'X:\caminho05\Arquivo\Arquivo_03.ndf';
+SET @NewValueMB = '2378';
+SET @ShrinkFileCommandSQL = 'DBCC SHRINKFILE (''' + @Name_File_Logical + ''', '+ @NewValueMB +')';
+----- Executa e loga Shrinkfile
+   BEGIN TRY 
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '1-Início file 2 da etapa 01');
+      PRINT @ShrinkFileCommandSQL;
+      EXEC ( @ShrinkFileCommandSQL ) ;
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '2-Fim file 2 da etapa 01');
+   END TRY
+   BEGIN CATCH
+      SELECT error_message() [errmsg], error_severity() [severity], error_state() [state]
+           , error_number() [errno], error_procedure() [proc], error_line() [lineno];
+      SET @vError = ERROR_NUMBER();
+      SET @vErrorMessageOriginal = ERROR_MESSAGE();
+      SET @vErrorMessage = '8-Msg Error : ' + CAST(@vError AS nvarchar) + ', ' + ISNULL(@vErrorMessageOriginal,'');
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, @vErrorMessage);
+   END CATCH
+
+
+SET @Name_DB = 'Arquivo';
+SET @Name_File_Logical = 'Arquivo_04';
+SET @Name_File_Physical = 'X:\caminho06\Arquivo\Arquivo_04.ndf';
+SET @NewValueMB = '2378';
+SET @ShrinkFileCommandSQL = 'DBCC SHRINKFILE (''' + @Name_File_Logical + ''', '+ @NewValueMB +')';
+----- Executa e loga Shrinkfile
+   BEGIN TRY 
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '1-Início file 3 da etapa 01');
+      PRINT @ShrinkFileCommandSQL;
+      EXEC ( @ShrinkFileCommandSQL ) ;
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '1-Fim file 2 da etapa 01');
+   END TRY
+   BEGIN CATCH
+      SELECT error_message() [errmsg], error_severity() [severity], error_state() [state]
+           , error_number() [errno], error_procedure() [proc], error_line() [lineno];
+      SET @vError = ERROR_NUMBER();
+      SET @vErrorMessageOriginal = ERROR_MESSAGE();
+      SET @vErrorMessage = '8-Msg Error : ' + CAST(@vError AS nvarchar) + ', ' + ISNULL(@vErrorMessageOriginal,'');
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, @vErrorMessage);
+   END CATCH
+
+/* 002 - DESABILITA FILEGROWTH DOS DEMAIS ARQUIVOS */
+USE [master]
+GO
+DECLARE @DB_Alvo SYSNAME;
+DECLARE @Name_File_Logical SYSNAME;
+DECLARE @ModifyFileCommandSQL NVARCHAR(4000);
+
+SET @DB_Alvo = 'Arquivo'
+	  SET @Name_File_Logical = 'Arquivo_02';
+SET @ModifyFileCommandSQL = 'ALTER DATABASE ['+ @DB_Alvo +'] MODIFY FILE ( NAME = N'''+ @Name_File_Logical +''', MAXSIZE = UNLIMITED, FILEGROWTH = 0)';
+PRINT @ModifyFileCommandSQL;
+      EXEC ( @ModifyFileCommandSQL ) ;
+
+	  SET @Name_File_Logical = 'Arquivo_03';
+SET @ModifyFileCommandSQL = 'ALTER DATABASE ['+ @DB_Alvo +'] MODIFY FILE ( NAME = N'''+ @Name_File_Logical +''', MAXSIZE = UNLIMITED, FILEGROWTH = 0)';
+PRINT @ModifyFileCommandSQL;
+      EXEC ( @ModifyFileCommandSQL ) ;
+
+	  SET @Name_File_Logical = 'Arquivo_04';
+SET @ModifyFileCommandSQL = 'ALTER DATABASE ['+ @DB_Alvo +'] MODIFY FILE ( NAME = N'''+ @Name_File_Logical +''', MAXSIZE = UNLIMITED, FILEGROWTH = 0)';
+PRINT @ModifyFileCommandSQL;
+      EXEC ( @ModifyFileCommandSQL ) ;
+
+
+/* 003 - EMPTYFILE */
+USE Arquivo
+GO
+
+SET NOCOUNT ON;
+DECLARE @vError INT;
+DECLARE @vErrorMessage NVARCHAR(4000);
+DECLARE @vErrorMessageOriginal NVARCHAR(4000);
+DECLARE @ShrinkFileCommandSQL NVARCHAR(4000);
+DECLARE @Name_DB SYSNAME;
+DECLARE @Name_File_Logical SYSNAME;
+DECLARE @Name_File_Physical SYSNAME;
+
+
+SET @Name_DB = 'Arquivo';
+SET @Name_File_Logical = 'Arquivo_01';
+SET @Name_File_Physical = 'X:\caminho06\Arquivo\Arquivo.mdf';
+SET @ShrinkFileCommandSQL = 'DBCC SHRINKFILE (''' + @Name_File_Logical + ''', EMPTYFILE)';
+
+----- Executa e loga Shrinkfile
+   BEGIN TRY 
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '3-Início da execução do EMPTYFILE');
+      PRINT @ShrinkFileCommandSQL;
+      EXEC ( @ShrinkFileCommandSQL ) ;
+   END TRY
+   BEGIN CATCH
+      SELECT error_message() [errmsg], error_severity() [severity], error_state() [state]
+           , error_number() [errno], error_procedure() [proc], error_line() [lineno];
+      SET @vError = ERROR_NUMBER();
+      SET @vErrorMessageOriginal = ERROR_MESSAGE();
+      SET @vErrorMessage = '4 - EMPTY Finalizado ou 8-Msg Error : ' + CAST(@vError AS nvarchar) + ', ' + ISNULL(@vErrorMessageOriginal,'');
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, @vErrorMessage);
+   END CATCH
+
+
+/* 04 Fazer Shrink do arquivo alvo */ 
+USE Arquivo
+GO
+
+SET NOCOUNT ON;
+DECLARE @vError INT;
+DECLARE @vErrorMessage NVARCHAR(4000);
+DECLARE @vErrorMessageOriginal NVARCHAR(4000);
+DECLARE @ShrinkFileCommandSQL NVARCHAR(4000);
+DECLARE @Name_DB SYSNAME;
+DECLARE @Name_File_Logical SYSNAME;
+DECLARE @Name_File_Physical SYSNAME;
+DECLARE @NewValueMB VARCHAR(10);
+
+SET @Name_DB = 'Arquivo';
+SET @Name_File_Logical = 'Arquivo_01';
+SET @Name_File_Physical = 'X:\caminho06\Arquivo\Arquivo.mdf';
+SET @NewValueMB = '3072';
+SET @ShrinkFileCommandSQL = 'DBCC SHRINKFILE (''' + @Name_File_Logical + ''', '+ @NewValueMB +')';
+----- Executa e loga Shrinkfile
+   BEGIN TRY 
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '5-Início da etapa 04 - shrink principal');
+      PRINT @ShrinkFileCommandSQL;
+      EXEC ( @ShrinkFileCommandSQL ) ;
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, '6-Fim da etapa 04 - shrink principal');
+   END TRY
+   BEGIN CATCH
+      SELECT error_message() [errmsg], error_severity() [severity], error_state() [state]
+           , error_number() [errno], error_procedure() [proc], error_line() [lineno];
+      SET @vError = ERROR_NUMBER();
+      SET @vErrorMessageOriginal = ERROR_MESSAGE();
+      SET @vErrorMessage = '8-Msg Error : ' + CAST(@vError AS nvarchar) + ', ' + ISNULL(@vErrorMessageOriginal,'');
+      INSERT INTO [_DB_Adm].[dbo].[DBMonitoraShrinkFile]([DataExecucao], [NomeBanco], [NomeDatafile], [PhysicalDatafile], [Comando], [Observacao])
+           VALUES (GETDATE(), @Name_DB, @Name_File_Logical, @Name_File_Physical, @ShrinkFileCommandSQL, @vErrorMessage);
+   END CATCH
+
+
+/* 05 - Habilitar o FILEGROWTH dos arquivos */
+USE [master]
+GO
+
+DECLARE @Name_File_Logical SYSNAME;
+DECLARE @NEW_SIZE VARCHAR(10);
+DECLARE @MAX_SIZE VARCHAR(10);
+DECLARE @DB_Alvo SYSNAME;
+DECLARE @ModifyFileCommandSQL NVARCHAR(4000);
+
+SET @NEW_SIZE = 3072
+SET @MAX_SIZE = 20480
+SET @DB_Alvo = 'Arquivo'
+
+SET @Name_File_Logical = 'Arquivo_01';
+SET @ModifyFileCommandSQL = 'ALTER DATABASE ['+ @DB_Alvo +'] MODIFY FILE ( NAME = N'''+ @Name_File_Logical +''', MAXSIZE = '+ @MAX_SIZE + 'MB, FILEGROWTH = 100MB)';
+PRINT @ModifyFileCommandSQL;
+      EXEC ( @ModifyFileCommandSQL ) ;
+
+	  
+SET @Name_File_Logical = 'Arquivo_02';
+
+SET @ModifyFileCommandSQL = 'ALTER DATABASE ['+ @DB_Alvo +'] MODIFY FILE ( NAME = N'''+ @Name_File_Logical +''', SIZE = '+@NEW_SIZE +'MB, MAXSIZE = '+ @MAX_SIZE + 'MB, FILEGROWTH = 100MB)';
+PRINT @ModifyFileCommandSQL;
+      EXEC ( @ModifyFileCommandSQL ) ;
+
+	  
+	  SET @Name_File_Logical = 'Arquivo_03';
+SET @ModifyFileCommandSQL = 'ALTER DATABASE ['+ @DB_Alvo +'] MODIFY FILE ( NAME = N'''+ @Name_File_Logical +''', SIZE = '+@NEW_SIZE +'MB, MAXSIZE = '+ @MAX_SIZE + 'MB, FILEGROWTH = 100MB)';
+PRINT @ModifyFileCommandSQL;
+      EXEC ( @ModifyFileCommandSQL ) ;
+
+	  SET @Name_File_Logical = 'Arquivo_04';
+SET @ModifyFileCommandSQL = 'ALTER DATABASE ['+ @DB_Alvo +'] MODIFY FILE ( NAME = N'''+ @Name_File_Logical +''', SIZE = '+@NEW_SIZE +'MB, MAXSIZE = '+ @MAX_SIZE + 'MB, FILEGROWTH = 100MB)';
+PRINT @ModifyFileCommandSQL;
+      EXEC ( @ModifyFileCommandSQL ) ;
+  
+  
+
+
+
+/*
+
+
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT [id_DBMonitoraShrinkFile]
+      ,[DataExecucao]
+      ,[NomeBanco]
+      ,[NomeDatafile]
+      ,[PhysicalDatafile]
+      ,[Comando]
+      ,[Observacao]
+  FROM [_DB_Adm].[dbo].[DBMonitoraShrinkFile] with (nolock)
+  WHERE [DataExecucao] >= '2018-06-13 14:00:00'
+ORDER BY [DataExecucao] DESC , [id_DBMonitoraShrinkFile] DESC
+go
+--- Estimating when a job will finish
+SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+
+SELECT r.percent_complete
+, DATEDIFF(MINUTE, start_time, GETDATE()) AS Age
+, RIGHT('00'+CAST((CAST(DATEDIFF(s, start_time, (DATEADD(MINUTE, DATEDIFF(MINUTE, start_time, GETDATE()) / percent_complete * 100, start_time))) AS int))/3600 AS varchar),2) + ':' 
+        + RIGHT('00'+CAST(
+                           (CAST(DATEDIFF(s, start_time, (DATEADD(MINUTE, DATEDIFF(MINUTE, start_time, GETDATE()) / percent_complete * 100, start_time))) AS int))/60 
+                           -
+                           ((CAST(DATEDIFF(s, start_time, (DATEADD(MINUTE, DATEDIFF(MINUTE, start_time, GETDATE()) / percent_complete * 100, start_time))) AS int))/3600)*60
+           AS varchar),2) + ':'
+        + RIGHT('000'+CAST((CAST(DATEDIFF(s, start_time, (DATEADD(MINUTE, DATEDIFF(MINUTE, start_time, GETDATE()) / percent_complete * 100, start_time))) AS int))%60 AS varchar),2)
+        AS Total_Time
+, DATEADD(MINUTE, DATEDIFF(MINUTE, start_time, GETDATE()) / percent_complete * 100, start_time) AS EstimatedEndTime
+, t.Text AS ParentQuery
+, SUBSTRING (t.text,(r.statement_start_offset/2) + 1,
+((CASE WHEN r.statement_end_offset = -1
+THEN LEN(CONVERT(NVARCHAR(MAX), t.text)) * 2
+ELSE r.statement_end_offset
+END - r.statement_start_offset)/2) + 1) AS IndividualQuery
+, start_time
+, DB_NAME(Database_Id) AS DatabaseName
+, Status
+FROM sys.dm_exec_requests r
+CROSS APPLY sys.dm_exec_sql_text(sql_handle) t
+WHERE session_id > 50
+AND percent_complete > 0
+ORDER BY percent_complete DESC
+GO
+
+
+*/

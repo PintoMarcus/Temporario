@@ -1,0 +1,234 @@
+
+--verificar sessões no postgres:
+SELECT * FROM pg_stat_activity;
+SELECT * FROM pg_stat_activity where state = 'active';
+
+--Sugestão de procedure:
+
+CREATE OR REPLACE PROCEDURE check_and_create_indexes() AS $$
+DECLARE
+    result RECORD;
+BEGIN
+    -- Executa a consulta e guarda o resultado na variável 'result'
+    SELECT * FROM oiid.bd_oiid_consumo_sasid WHERE nu_documento > '1' FETCH FIRST 1 ROW ONLY INTO result;
+    
+    -- Verifica se o resultado é nulo
+    IF NOT FOUND THEN
+        -- Se a consulta não trouxer resultado dentro de 2 segundos, executa os comandos abaixo
+        PERFORM pg_sleep(2); -- Aguarda 2 segundos
+        CREATE INDEX IF NOT EXISTS idx_bd_oiid_consumo_sasid_001 ON oiid.bd_oiid_consumo_sasid(nu_documento);
+        CREATE INDEX IF NOT EXISTS idx_bd_oiid_consumo_sasid_002 ON oiid.bd_oiid_consumo_sasid(bov_ftth_contrato);
+        CREATE INDEX IF NOT EXISTS idx_bd_oiid_consumo_sasid_003 ON oiid.bd_oiid_consumo_sasid(sf_fibra_contrato);
+        VACUUM VERBOSE ANALYZE oiid.bd_oiid_consumo_sasid;
+    ELSE
+        -- Se a consulta retornar resultados em menos de 1 segundo, encerra a procedure
+        RETURN;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+Nesta procedure, primeiro é feita a consulta utilizando o comando SELECT, e o resultado é armazenado na variável result. Em seguida, é verificado se o resultado é nulo utilizando o IF NOT FOUND. Se o resultado for nulo, a procedure executa os comandos de criação de índices e a atualização de estatísticas com VACUUM. Se a consulta retornar resultados em menos de 1 segundo, a procedure simplesmente encerra sem executar nenhum comando adicional.
+
+
+
+
+nvd.marcus.pinto@outlook.com
+agora como faço para criar um agendamento e executar a  procedure PROCEDURE check_and_create_indexes() todos os dias às 7:00 AM ?
+Para agendar a execução da procedure check_and_create_indexes() todos os dias às 7:00 AM no PostgreSQL, você pode utilizar o recurso de agendamento de tarefas do sistema operacional em conjunto com o utilitário psql.
+
+Crie um arquivo com o comando para executar a procedure, por exemplo, script.sql:
+sql
+Copy code
+-- script.sql
+CALL check_and_create_indexes();
+Crie uma tarefa agendada no sistema operacional para executar o comando psql com o arquivo script.sql:
+No Linux, você pode usar o cron. Para editar o arquivo de cron, digite o comando crontab -e no terminal e adicione a seguinte linha:
+php
+Copy code
+0 7 * * * psql -U <usuario> -d <banco_de_dados> -f /caminho/para/script.sql
+Substitua <usuario>, <banco_de_dados> e /caminho/para/script.sql pelos valores corretos para o seu ambiente.
+
+No Windows, você pode usar o Agendador de Tarefas. Para criar uma nova tarefa, abra o Agendador de Tarefas, clique em "Criar Tarefa Básica", siga as instruções e, na aba "Ações", adicione uma nova ação para executar o seguinte comando:
+php
+Copy code
+"C:\Program Files\PostgreSQL\<versão>\bin\psql.exe" -U <usuario> -d <banco_de_dados> -f "C:\caminho\para\script.sql"
+Substitua <usuario>, <banco_de_dados>, <versão> e C:\caminho\para\script.sql pelos valores corretos para o seu ambiente.
+
+Certifique-se de que o usuário utilizado para executar o comando psql tem permissão para executar a procedure e criar índices no banco de dados.
+
+
+
+
+nvd.marcus.pinto@outlook.com
+não consigo criar os agendamentos internamente no postgres? algo semelhante aos  jobs que podemos criar no sqlserver agent?
+No PostgreSQL não existe um recurso nativo para agendamento de tarefas. No entanto, existem algumas soluções de terceiros que podem ser utilizadas para automatizar a execução de scripts ou comandos no PostgreSQL.
+
+Uma dessas soluções é o pgAgent, que é uma extensão do PostgreSQL que permite criar jobs e agendar a execução de comandos SQL, scripts ou programas externos. O pgAgent é compatível com as versões do PostgreSQL 9.0 e posteriores.
+
+Para utilizar o pgAgent, é necessário instalar a extensão e criar os jobs com os comandos ou scripts que devem ser executados. Em seguida, é possível agendar a execução desses jobs utilizando o agendador de tarefas do sistema operacional, como o cron no Linux ou o Agendador de Tarefas no Windows.
+
+Outra opção é utilizar ferramentas de terceiros que oferecem recursos de agendamento para o PostgreSQL, como o pgAdmin, que permite criar jobs e agendar a execução de comandos SQL diretamente na interface gráfica. Além disso, existem outras ferramentas como o pgbadger, pgBackRest, entre outras que também permitem a automação de tarefas no PostgreSQL.
+
+
+
+
+nvd.marcus.pinto@outlook.com
+como faço para criar o job no pgadmin?
+Para criar um job no pgAdmin, siga os seguintes passos:
+
+Abra o pgAdmin e conecte-se ao servidor desejado.
+Clique com o botão direito do mouse no banco de dados desejado e selecione "Create" e depois "Scheduled Task".
+Na guia "General", dê um nome para a tarefa e selecione um owner para a tarefa.
+Na guia "Command", selecione a opção "Execute a script".
+Insira o comando que chama a sua procedure no campo "Script".
+Na guia "Definition", selecione a opção "Recurring" para a tarefa ser executada de forma recorrente e selecione a frequência desejada (no caso, diariamente às 7:00 AM).
+Clique em "Save" para salvar a tarefa.
+Após criar a tarefa, ela será exibida na seção "Scheduled Tasks" do banco de dados selecionado. Você também pode gerenciá-la por meio dessa seção, como executá-la manualmente ou alterar suas configurações.
+
+
+
+
+nvd.marcus.pinto@outlook.com
+tenho uma carga ETL que é executada diariamente no postgres, como sei que o processo foi encerrado ?
+Existem várias maneiras de verificar se um processo ETL foi encerrado no PostgreSQL, dependendo da forma como ele foi executado. Algumas opções são:
+
+Verificar o log de execução: Quando um processo é executado no PostgreSQL, informações sobre sua execução são registradas no arquivo de log. Você pode verificar o arquivo de log para ver se o processo foi executado com sucesso e se não houve nenhum erro durante a execução. O arquivo de log geralmente está localizado em um diretório específico no servidor PostgreSQL. Você pode consultar a configuração log_directory no arquivo postgresql.conf para descobrir o local exato do arquivo de log. Além disso, você pode executar o comando SELECT pg_current_logfile() para obter o caminho para o arquivo de log atual.
+
+Verificar o status da tabela de destino: Se o processo ETL carrega dados em uma tabela específica, você pode verificar o status da tabela para ver se ela foi atualizada com os dados mais recentes. Você pode usar um comando SELECT simples para verificar o número de registros na tabela ou verificar se as colunas foram atualizadas de acordo com o esperado.
+
+Verificar o status do processo ETL: Dependendo de como o processo ETL é executado, ele pode fornecer informações sobre seu status de execução. Por exemplo, se o processo ETL foi executado usando o utilitário pg_dump ou o utilitário psql, ele pode fornecer uma mensagem de saída que indica se a carga foi executada com sucesso ou se houve algum erro.
+
+Usar ferramentas de monitoramento de processos: Existem várias ferramentas de monitoramento de processos disponíveis para o PostgreSQL, como o pgAdmin e o ptop. Essas ferramentas permitem que você monitore o status dos processos em execução em tempo real e verifique se o processo ETL foi encerrado com sucesso.
+
+Em resumo, existem várias maneiras de verificar se um processo ETL foi encerrado no PostgreSQL. A escolha da melhor opção depende da forma como o processo foi executado e do tipo de informação que você está procurando.
+
+
+
+
+nvd.marcus.pinto@outlook.com
+não achei a opção "Scheduled Task", o Pgadmin que estou é versão 6.15. Há outro lugar onde procurar?
+Com a versão 6 do pgAdmin, a opção "Scheduled Task" foi removida. Em vez disso, você pode criar um job usando a extensão pgAgent. Para criar um job usando o pgAgent, siga as etapas abaixo:
+
+Certifique-se de que a extensão pgAgent esteja instalada. Você pode verificar isso executando o seguinte comando SQL:
+sql
+Copy code
+SELECT * FROM pg_extension WHERE extname='pgagent';
+Se o resultado não retornar nenhuma linha, você precisará instalar a extensão pgAgent. Isso pode ser feito usando o seguinte comando SQL:
+
+sql
+Copy code
+CREATE EXTENSION pgagent;
+Na barra lateral esquerda do pgAdmin, clique com o botão direito em "pgAgent" e selecione "Create Job".
+
+Na guia "General", insira um nome para o job.
+
+Na guia "Steps", clique em "Add" para adicionar uma nova etapa.
+
+Na guia "Step", insira um nome para a etapa e selecione o banco de dados apropriado. Na seção "Command", insira o comando SQL que você deseja executar.
+
+Na guia "Schedule", defina a programação para o job.
+
+Clique em "OK" para salvar o job.
+
+Depois de criar o job, você pode verificar o status do job na seção "Jobs" na barra lateral esquerda do pgAdmin. O status do job será atualizado automaticamente à medida que o job for executado.
+
+
+
+
+nvd.marcus.pinto@outlook.com
+ERROR:  extension "pgagent" is not available
+DETAIL:  Could not open extension control file "D:/Program Files/PostgreSQL/15/share/extension/pgagent.control": No such file or directory.
+HINT:  The extension must first be installed on the system where PostgreSQL is running.
+Como encontro o arquivo pgagent.control?
+O arquivo pgagent.control é o arquivo de controle da extensão pgAgent e deve estar presente no diretório de instalação da extensão. Se você estiver vendo essa mensagem de erro, provavelmente significa que a extensão pgAgent não está instalada em seu sistema ou está instalada em um local diferente do esperado pelo PostgreSQL.
+
+Para resolver o problema, você precisará primeiro verificar se a extensão pgAgent está instalada no seu sistema. Para isso, você pode executar o seguinte comando no PostgreSQL:
+
+sql
+Copy code
+SELECT * FROM pg_available_extensions WHERE name='pgagent';
+Se a extensão estiver instalada, você verá uma linha de resultado com informações sobre a extensão. Caso contrário, você precisará instalá-la manualmente.
+
+Para instalar a extensão pgAgent manualmente, você pode seguir as instruções do site oficial do pgAgent (https://www.pgadmin.org/docs/pgadmin4/development/pgagent_install.html) ou usar um pacote de instalação de terceiros.
+
+Após instalar a extensão, você precisará carregá-la no PostgreSQL usando o comando CREATE EXTENSION pgagent;. Verifique se o arquivo pgagent.control está presente no diretório de instalação da extensão e tente executar seus agendamentos novamente.
+
+
+
+
+
+
+
+------------------------------------
+Tenho o seguinte cenário, possuo um banco de dados postgres que recebe uma carga em ETL de uma aplicação. Eventualmente ocorrem falhas no processo e não sabemos se o problema está no banco de dados ou se na aplicação que realiza a carga.
+01) Me dê algumas dicas de como investigar.
+02) como posso ativar uma auditoria no postgres para acompanhar esse processo de carga de ETL?
+03) Gere o código de como ativar a auditoria: Informações adcionais: nome do banco de dados é 'oiid', usuário é 'psqloiidbsouthapi', schema é 'oiid', tabelas são 'bd_oiid_consumo_sasid' e 'bd_oiid_consumo_sasid_tmp'.
+Para investigar a causa das falhas no processo de carga de ETL, você pode seguir algumas dicas:
+Verifique os logs do servidor de banco de dados para ver se há mensagens de erro relacionadas à carga de dados.
+Verifique o desempenho do banco de dados durante o processo de carga e procure por sinais de problemas de desempenho, como alta utilização de CPU, alta utilização de memória ou tempo de resposta lento.
+Execute consultas de diagnóstico no banco de dados para identificar possíveis gargalos ou problemas de bloqueio que possam estar afetando o processo de carga.
+Verifique o processo de carga em si para ver se há problemas de integridade de dados, como valores nulos ou violações de restrições de chave primária ou estrangeira.
+Para ativar a auditoria no PostgreSQL, você pode usar o módulo "pgAudit", que permite registrar as operações executadas no banco de dados, incluindo consultas SQL, logins, desconexões e alterações de esquema. Com a auditoria ativada, você pode rastrear as operações executadas durante o processo de carga de ETL e identificar possíveis problemas ou anomalias.
+
+Para ativar a auditoria usando o módulo "pgAudit" no PostgreSQL com as informações adicionais fornecidas, siga os seguintes passos:
+
+Instale o módulo pgAudit usando o gerenciador de pacotes do seu sistema operacional ou compilando a partir do código-fonte.
+Crie uma extensão pgAudit no banco de dados "oiid" usando a seguinte consulta SQL:
+sql
+Copy code
+CREATE EXTENSION IF NOT EXISTS pgaudit;
+Configure as opções de auditoria desejadas no arquivo de configuração do PostgreSQL (postgresql.conf) ou no arquivo de configuração da sessão (postgresql.auto.conf), como por exemplo:
+python
+Copy code
+pgaudit.log = all
+pgaudit.log_level = verbose
+Crie uma política de auditoria para as tabelas "bd_oiid_consumo_sasid" e "bd_oiid_consumo_sasid_tmp" no schema "oiid" usando a seguinte consulta SQL:
+sql
+Copy code
+CREATE POLICY audit_bd_oiid_consumo_sasid ON oiid.bd_oiid_consumo_sasid
+    USING (
+        true
+    )
+    WITH CHECK (
+        true
+    );
+
+CREATE POLICY audit_bd_oiid_consumo_sasid_tmp ON oiid.bd_oiid_consumo_sasid_tmp
+    USING (
+        true
+    )
+    WITH CHECK (
+        true
+    );
+Essas políticas de auditoria vão registrar todas as operações nas tabelas "bd_oiid_consumo_sasid" e "bd_oiid_consumo_sasid_tmp" no schema "oiid". As políticas são criadas usando uma cláusula "USING" que define uma condição que deve ser verdadeira para a política ser aplicada, e uma cláusula "WITH CHECK" que define uma condição que deve ser verdadeira para que a operação seja permitida. As condições usadas acima são simplesmente "true" para registrar todas as operações.
+
+Com essas configurações, o PostgreSQL começará a registrar as operações nas tabelas especificadas no log de auditoria, que pode ser consultado posteriormente para fins de diagnóstico e investigação.
+
+
+
+
+nvd.marcus.pinto@outlook.com
+como verifico se o pgaudit está ativo?
+Para verificar se o módulo pgAudit está ativo no PostgreSQL, você pode seguir os seguintes passos:
+
+Conecte-se ao servidor de banco de dados PostgreSQL usando um cliente SQL, como psql ou pgAdmin.
+
+Execute a seguinte consulta SQL para listar todas as extensões instaladas no banco de dados:
+
+sql
+Copy code
+SELECT * FROM pg_extension;
+Verifique se a extensão pgAudit aparece na lista de extensões instaladas. Se a extensão não aparecer, isso significa que ela não foi instalada corretamente ou não está disponível no banco de dados.
+
+Se a extensão pgAudit aparecer na lista, você pode verificar se a auditoria está ativada verificando o arquivo de log do PostgreSQL. Por padrão, as mensagens de log de auditoria são gravadas no mesmo arquivo de log padrão usado pelo PostgreSQL para as mensagens de log do sistema. Você pode verificar o caminho do arquivo de log configurado no arquivo de configuração do PostgreSQL (postgresql.conf).
+
+Abra o arquivo de log e procure por mensagens de log que contenham a palavra "AUDIT" para identificar as operações registradas pelo pgAudit. As mensagens de log podem incluir informações sobre o usuário, o endereço IP, o nome do banco de dados e a operação realizada.
+
+Se você não encontrar nenhuma mensagem de log de auditoria, pode ser necessário ajustar as configurações de auditoria no arquivo de configuração do PostgreSQL e reiniciar o serviço do PostgreSQL para que as alterações entrem em vigor.
+
+
+

@@ -1,0 +1,18 @@
+SELECT 
+    pid, 
+    state, 
+    waiting, 
+    query_start,
+    query, 
+    blocking_pids 
+FROM 
+    pg_stat_activity;
+
+
+/*
+O pid é o identificador do processo do backend.
+O state é o estado do processo (por exemplo, active, idle).
+A coluna waiting indica se o processo está esperando por algo (true ou false).
+A coluna query contém a consulta SQL que o processo está executando.
+A coluna blocking_pids contém o PID de qualquer processo que esteja bloqueando o processo atual.
+*/
