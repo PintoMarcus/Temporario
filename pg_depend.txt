@@ -1,0 +1,28 @@
+SELECT
+  n.nspname AS schema_name,
+  c.relname AS object_name,
+  CASE
+    WHEN d.deptype = 'a' THEN 'Aggregate'
+    WHEN d.deptype = 'b' THEN 'View'
+    WHEN d.deptype = 'c' THEN 'Composite type'
+    WHEN d.deptype = 'd' THEN 'Domain'
+    WHEN d.deptype = 'e' THEN 'Table'
+    WHEN d.deptype = 'f' THEN 'Foreign table'
+    WHEN d.deptype = 'i' THEN 'Index'
+    WHEN d.deptype = 'n' THEN 'Schema'
+    WHEN d.deptype = 'o' THEN 'Operator'
+    WHEN d.deptype = 'r' THEN 'Rule'
+    WHEN d.deptype = 'S' THEN 'Sequence'
+    WHEN d.deptype = 'T' THEN 'Trigger'
+    WHEN d.deptype = 't' THEN 'Toast table'
+    WHEN d.deptype = 'p' THEN 'Table partition'
+    WHEN d.deptype = 'I' THEN 'Partitioned index'
+    ELSE 'Unknown'
+  END AS object_type
+FROM
+  pg_depend d
+  JOIN pg_class c ON d.objid = c.oid
+  JOIN pg_namespace n ON c.relnamespace = n.oid
+  JOIN pg_roles u ON d.refobjid = u.oid
+WHERE
+  u.rolname = 'igor';
