@@ -25,4 +25,21 @@ FROM
   JOIN pg_namespace n ON c.relnamespace = n.oid
   JOIN pg_roles u ON d.refobjid = u.oid
 WHERE
-  u.rolname = 'igor';
+  u.rolname = 'nome-da-role';
+
+
+
+
++++++++++++++++++
+SELECT
+  n.nspname AS schema_name,
+  r.rolname AS role_name,
+  c.relname AS object_name,
+  d.*
+FROM
+  pg_default_acl d
+  JOIN pg_class c ON d.objoid = c.oid
+  JOIN pg_namespace n ON c.relnamespace = n.oid
+  JOIN pg_roles r ON d.defaclrole = r.oid
+WHERE
+  r.rolname = 'nome-da-role';
