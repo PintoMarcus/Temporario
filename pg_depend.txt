@@ -43,3 +43,22 @@ FROM
   JOIN pg_roles r ON d.defaclrole = r.oid
 WHERE
   r.rolname = 'nome-da-role';
+
+
++++++++++++++++++++++
+
+SELECT object_name
+FROM pg_catalog.pg_depend
+WHERE refclassid = 'pg_roles'::pg_catalog.regclass
+AND refobjid = (SELECT oid FROM pg_roles WHERE rolname = 'nome-da-role');
+
+
+++++++++++++++++
+SELECT 
+    OBJECT_NAME(object_id) AS ObjectName,
+    type_desc AS ObjectType
+FROM sys.database_principals dp
+INNER JOIN sys.database_permissions dpn
+    ON dp.principal_id = dpn.grantee_principal_id
+WHERE dp.name = 'nome-da-role'
+
