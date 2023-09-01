@@ -62,3 +62,29 @@ INNER JOIN sys.database_permissions dpn
     ON dp.principal_id = dpn.grantee_principal_id
 WHERE dp.name = 'nome-da-role'
 
++++++++++++++++
+
+-- Revogar todas as permissões do usuário em todas as tabelas
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM igor;
+
+-- Revogar todas as permissões do usuário em todas as sequências
+REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM igor;
+
+-- Revogar todas as permissões do usuário em todas as funções
+REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM igor;
+
+-- Revogar todas as permissões do usuário em todas as schemas
+REVOKE ALL PRIVILEGES ON SCHEMA public FROM igor;
+
+-- Revogar a conexão do usuário ao banco de dados
+REVOKE CONNECT ON DATABASE NOME_DO_SEU_BANCO FROM igor;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE igor REVOKE ALL ON SEQUENCES FROM PUBLIC;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE igor REVOKE ALL ON FUNCTIONS FROM PUBLIC;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE igor IN SCHEMA schema_name REVOKE ALL ON TABLES FROM PUBLIC;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE igor REVOKE ALL ON TABLES FROM PUBLIC;
+
+
