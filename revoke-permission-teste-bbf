@@ -1,0 +1,11 @@
+-- script para teste de revoke no babelfish
+
+DECLARE @sql NVARCHAR(MAX);
+SET @sql = N'';
+
+SELECT @sql = @sql + 'REVOKE ALL ON ' + QUOTENAME(schema_name(schema_id)) + '.' + QUOTENAME(name) + ' FROM [minha-role];'
+FROM sys.objects
+WHERE principal_id = USER_ID(N'minha-role');
+
+-- Execute as instruções geradas
+EXEC sp_executesql @sql;
