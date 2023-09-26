@@ -12,3 +12,9 @@ WHERE grantee_principal_id = DATABASE_PRINCIPAL_ID(@RoleName);
 
 -- Exibir os comandos gerados
 PRINT @SQLCommands;
+
+
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM my-user;
+REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM my-user;
+REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM my-user;
+-- Continue revogando para outros objetos e esquemas, se aplicável
