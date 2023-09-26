@@ -1,11 +1,14 @@
--- script para teste de revoke no babelfish
+DECLARE @RoleName NVARCHAR(255) = N'minha-role'; -- Substitua pelo nome da sua role
+DECLARE @SQLCommands NVARCHAR(MAX) = N'';
 
-DECLARE @sql NVARCHAR(MAX);
-SET @sql = N'';
+-- Gerar comandos REVOKE com base nas permissões da role
+SELECT @SQLCommands = @SQLCommands + 
+    'REVOKE ' + permission_name + 
+    ' ON ' + QUOTENAME(schema_name) + '.' + QUOTENAME(o.name) + 
+    ' FROM ' + QUOTENAME(@RoleName) + ';' + CHAR(13) + CHAR(10)
+FROM sys.database_permissions AS p
+INNER JOIN sys.objects AS o ON p.major_id = o.object_id
+WHERE grantee_principal_id = DATABASE_PRINCIPAL_ID(@RoleName);
 
-SELECT @sql = @sql + 'REVOKE ALL ON ' + QUOTENAME(schema_name(schema_id)) + '.' + QUOTENAME(name) + ' FROM [minha-role];'
-FROM sys.objects
-WHERE principal_id = USER_ID(N'minha-role');
-
--- Execute as instruções geradas
-EXEC sp_executesql @sql;
+-- Exibir os comandos gerados
+PRINT @SQLCommands;
