@@ -124,3 +124,9 @@ WHERE refobjid = (SELECT oid FROM pg_roles WHERE rolname = 'marcus')
       OR classid = (SELECT oid FROM pg_roles WHERE rolname = 'marcus');
 
 
+
+SELECT obj_description(789769, 'pg_class') AS object_name, relname AS table_name
+FROM pg_class
+WHERE oid = 789769;
+
+
