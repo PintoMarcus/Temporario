@@ -36,3 +36,23 @@ INNER JOIN
     pg_namespace n ON n.oid = c.relnamespace
 WHERE 
     relowner = (SELECT usesysid FROM pg_user WHERE usename = 'seu_usuario');
+
+
+--
+--alterar schema padrão
+ALTER USER seu_usuario SET search_path = outro_schema;
+
+--verifica se possui papéis
+SELECT rolname FROM pg_user WHERE usename = 'seu_usuario';
+
+--lista permissões globais
+SELECT 
+    relname AS object_name, 
+    substring(split_part(privilege_type, ' ', 2) FROM 2) AS privilege
+FROM 
+    information_schema.role_table_grants
+WHERE 
+    grantee = 'seu_usuario';
+
+
+
