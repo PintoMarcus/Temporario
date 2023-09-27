@@ -116,13 +116,11 @@ WHERE refobjid = (SELECT oid FROM pg_roles WHERE rolname = 'marcus');
 
 ALTER DEFAULT PRIVILEGES FOR ROLE marcus REVOKE ALL ON FUNCTIONS FROM PUBLIC;
 
-
-SELECT DISTINCT relname, conname, nspname
+SELECT DISTINCT relname, nspname
 FROM pg_depend
 JOIN pg_class ON refobjid = pg_class.oid
-LEFT JOIN pg_constraint ON conoid = pg_constraint.oid
-JOIN pg_namespace ON connamespace = pg_namespace.oid
-WHERE refobjid = (SELECT oid FROM pg_roles WHERE rolname = 'marcus');
-
+JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid
+WHERE refobjid = (SELECT oid FROM pg_roles WHERE rolname = 'marcus')
+      OR classid = (SELECT oid FROM pg_roles WHERE rolname = 'marcus');
 
 
