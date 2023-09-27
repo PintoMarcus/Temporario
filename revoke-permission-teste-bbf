@@ -18,3 +18,21 @@ REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM my-user;
 REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM my-user;
 REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM my-user;
 -- Continue revogando para outros objetos e esquemas, se aplicável
+
+
+-----------
+SELECT 
+    n.nspname AS schema_name,
+    c.relname AS object_name,
+    CASE 
+        WHEN c.relkind = 'r' THEN 'table'
+        WHEN c.relkind = 'S' THEN 'sequence'
+        WHEN c.relkind = 'v' THEN 'view'
+        ELSE c.relkind
+    END AS object_type
+FROM 
+    pg_class c
+INNER JOIN 
+    pg_namespace n ON n.oid = c.relnamespace
+WHERE 
+    relowner = (SELECT usesysid FROM pg_user WHERE usename = 'seu_usuario');
