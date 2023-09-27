@@ -104,6 +104,9 @@ WHERE grantee IN (
 GROUP BY table_schema, table_name;
 
 
+REVOKE USAGE ON SCHEMA dbo FROM marcus;
+REVOKE SELECT ON ALL TABLES IN SCHEMA dbo FROM marcus;
+REVOKE SELECT ON ALL SEQUENCES IN SCHEMA dbo FROM marcus;
 
 
 
