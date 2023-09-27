@@ -55,4 +55,56 @@ WHERE
     grantee = 'seu_usuario';
 
 
+---
+SELECT routine_name, routine_schema
+FROM information_schema.routines
+WHERE routine_type = 'FUNCTION' AND specific_schema NOT IN ('pg_catalog', 'information_schema')
+AND specific_owner = 'seu_usuario';
+
+
+
+SELECT schema_name
+FROM information_schema.schemata
+WHERE schema_owner = 'seu_usuario';
+
+
+SELECT jobname, owner
+FROM pgagent.pga_job
+WHERE owner = 'seu_usuario';
+
+
+SELECT 
+    schemaname,
+    object_name,
+    object_type
+FROM pg_tables
+WHERE tableowner = 'seu_usuario';
+
+
+SELECT r.rolname AS role_name
+FROM pg_auth_members m
+JOIN pg_roles r ON m.roleid = r.oid
+WHERE m.member = (SELECT oid FROM pg_roles WHERE rolname = 'seu_usuario');
+
+
+SELECT extname, extnamespace::regnamespace, objname, objtype
+FROM pg_extension
+LEFT JOIN pg_depend ON objid = extname::regclass
+WHERE extowner = (SELECT oid FROM pg_roles WHERE rolname = 'seu_usuario');
+
+
+SELECT 
+    table_schema,
+    table_name,
+    string_agg(privilege_type, ', ') AS privileges
+FROM information_schema.role_table_grants
+WHERE grantee IN (
+    SELECT usename FROM pg_user WHERE rolname = 'seu_usuario'
+)
+GROUP BY table_schema, table_name;
+
+
+
+
+
 
