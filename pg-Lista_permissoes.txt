@@ -17,3 +17,22 @@ SELECT rolname, nspname, relname, relkind
 FROM pg_class
 JOIN pg_namespace ON (pg_class.relnamespace = pg_namespace.oid)
 WHERE pg_has_role(rolname, 'USAGE', 'schema'::text, nspname)
+
+-----
+-- Listar funções de propriedade de dlgaud
+SELECT 
+    proname AS function_name
+FROM 
+    pg_proc
+WHERE 
+    proowner = (SELECT oid FROM pg_roles WHERE rolname = 'dlgaud');
+
+-- Listar tabelas de propriedade de dlgaud
+SELECT 
+    tablename AS table_name
+FROM 
+    pg_tables
+WHERE 
+    schemaname NOT LIKE 'pg_%' AND
+    tableowner = (SELECT oid FROM pg_roles WHERE rolname = 'dlgaud');
+
