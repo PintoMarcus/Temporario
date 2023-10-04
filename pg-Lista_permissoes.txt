@@ -36,3 +36,31 @@ WHERE
     schemaname NOT LIKE 'pg_%' AND
     tableowner = (SELECT oid FROM pg_roles WHERE rolname = 'dlgaud');
 
+
+
+----
+listar objetos e owners
+SELECT 
+    CASE 
+        WHEN relkind = 'r' THEN 'Tabela'
+        WHEN relkind = 'v' THEN 'Visão'
+        WHEN relkind = 'i' THEN 'Índice'
+        WHEN relkind = 'S' THEN 'Sequência'
+        WHEN relkind = 's' THEN 'Especial'
+        WHEN relkind = 'f' THEN 'Tabela de Função'
+        WHEN relkind = 'p' THEN 'Tabela de Partição'
+        ELSE 'Desconhecido'
+    END AS tipo_objeto,
+    relname AS nome_objeto,
+    rolname AS proprietario
+FROM 
+    pg_class c
+JOIN 
+    pg_roles r ON c.relowner = r.oid
+WHERE 
+    relkind IN ('r', 'v', 'i', 'S', 's', 'f', 'p') 
+    AND relnamespace = 'public'::regnamespace
+ORDER BY 
+    tipo_objeto, nome_objeto;
+
+
