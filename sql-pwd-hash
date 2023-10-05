@@ -1,0 +1,30 @@
+
+-- comando para gerar o password hash 
+SELECT LOGINPROPERTY('seu-login','PASSWORDHASH');
+
+
+/*********************************************************************************/
+
+
+
+/**********************************************************************************/
+
+-- comando para gerar o SID hash 
+USE meu-banco 
+GO 
+SELECT name, sid FROM sys.sysusers 
+WHERE name = 'meu-user' 
+GO 
+USE MASTER 
+GO 
+SELECT name, sid FROM sys.sql_logins WHERE name = 'meu-login' 
+GO
+
+/**********************************************************************************/
+
+
+/**********************************************************************************/
+
+-- Criar usuário com SID e Password 
+USE [master]; CREATE LOGIN [meu-login] WITH PASSWORD=*********HASHED, SID = *********;
+
