@@ -1,0 +1,20 @@
+--função para considerar ª = a
+CREATE FUNCTION dbo.SubstituirAComA(
+    @texto NVARCHAR(MAX)
+)
+RETURNS NVARCHAR(MAX)
+AS
+BEGIN
+    SET @texto = REPLACE(REPLACE(@texto, N'ª', N'a'), N'ª', N'A')
+    RETURN @texto
+END
+
+
+---
+SELECT Coluna1, Coluna2
+FROM SuaTabela
+GROUP BY
+    CASE WHEN Coluna1 = Coluna2 THEN Coluna1
+         ELSE CONCAT(dbo.SubstituirAComA(Coluna1), dbo.SubstituirAComA(Coluna2))
+    END
+HAVING COUNT(*) > 1
