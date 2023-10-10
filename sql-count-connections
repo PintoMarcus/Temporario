@@ -9,3 +9,35 @@ GROUP BY
     DB_NAME(dbid)
 ORDER BY
     NumberOfConnections DESC;
+
+
+
++++++++++++++++++++++++++
+WITH AggregatedData AS (
+    SELECT
+        login_name,
+        DATEPART(YEAR, runtime) AS Year,
+        DATEPART(MONTH, runtime) AS Month,
+        DATEPART(DAY, runtime) AS Day,
+        DATEPART(HOUR, runtime) AS Hour,
+        DATEPART(MINUTE, runtime) AS Minute,
+        SUM(num_connections) AS TotalConnections
+    FROM
+        [dbo].[connections]
+    WHERE
+        runtime >= DATEADD(DAY, -90, GETDATE()) -- Limitar aos últimos 90 dias
+    GROUP BY
+        login_name,
+        DATEPART(YEAR, runtime),
+        DATEPART(MONTH, runtime),
+        DATEPART(DAY, runtime),
+        DATEPART(HOUR, runtime),
+        DATEPART(MINUTE, runtime)
+)
+SELECT
+    login_name,
+    MAX(TotalConnections) AS MaxConnections
+FROM
+    AggregatedData
+GROUP BY
+    login_name;
