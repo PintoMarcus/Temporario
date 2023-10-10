@@ -1,0 +1,11 @@
+SELECT
+    DB_NAME(dbid) AS DatabaseName,
+    COUNT(dbid) AS NumberOfConnections
+FROM
+    sys.sysprocesses
+WHERE
+    dbid > 0
+GROUP BY
+    DB_NAME(dbid)
+ORDER BY
+    NumberOfConnections DESC;
