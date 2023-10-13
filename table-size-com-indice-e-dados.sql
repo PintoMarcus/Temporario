@@ -23,48 +23,12 @@ GROUP BY t.NAME, p.rows;
 
 /*++++++++++++++++++++++++*/
 -- USANDO a PORTA do BABELFISH
--- Crie uma tabela temporária para armazenar os resultados
-CREATE TABLE #TableSizes
-(
-    TableName NVARCHAR(128),
-    RowCount INT,
-    ReservedSize VARCHAR(50),
-    DataSize VARCHAR(50),
-    IndexSize VARCHAR(50),
-    UnusedSize VARCHAR(50)
-)
-
--- Declare variáveis para conter o nome das tabelas
-DECLARE @TableName NVARCHAR(128)
-
--- Declare um cursor para percorrer as tabelas
-DECLARE tableCursor CURSOR FOR
-SELECT name
-FROM sys.tables
-
--- Itera pelas tabelas
-OPEN tableCursor
-FETCH NEXT FROM tableCursor INTO @TableName
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
-    INSERT INTO #TableSizes
-    EXEC sp_spaceused @TableName
-
-    FETCH NEXT FROM tableCursor INTO @TableName
-END
-
--- Fecha o cursor
-CLOSE tableCursor
-DEALLOCATE tableCursor
-
--- Seleciona os resultados
 SELECT
-    TableName AS 'Nome da Tabela',
-    RowCount AS 'Número de Linhas',
-    DataSize AS 'Tamanho dos Dados',
-    IndexSize AS 'Tamanho dos Índices'
-FROM #TableSizes
+    t.name AS TableName,
+    SUM(p.rows) AS NumeroDeLinhas,
+    SUM(s.total_pages * 8) AS EspacoTotalKB
+FROM sys.tables t
+INNER JOIN sys.partitions p ON t.object_id = p.object_id
+INNER JOIN sys.dm_db_partition_stats s ON t.object_id = s.object_id AND p.index_id = s.index_id
+GROUP BY t.name;
 
--- Limpa a tabela temporária
-DROP TABLE #TableSizes
