@@ -22,13 +22,37 @@ GROUP BY t.NAME, p.rows;
 
 
 /*++++++++++++++++++++++++*/
--- USANDO a PORTA do BABELFISH
-SELECT
-    t.name AS TableName,
-    SUM(p.rows) AS NumeroDeLinhas,
-    SUM(s.total_pages * 8) AS EspacoTotalKB
-FROM sys.tables t
-INNER JOIN sys.partitions p ON t.object_id = p.object_id
-INNER JOIN sys.dm_db_partition_stats s ON t.object_id = s.object_id AND p.index_id = s.index_id
-GROUP BY t.name;
+-- USANDO a Postgres
 
+DO $$ 
+DECLARE
+    table_record record;
+    total_size_bytes bigint;
+BEGIN
+    RAISE NOTICE 'Tabela | NumeroDeLinhas | EspacoTotalKB | EspacoUsadoKB | EspacoLivreKB | EspacoUsadoPorDadosKB | EspacoUsadoPorIndicesKB';
+
+    FOR table_record IN (SELECT schemaname, tablename FROM pg_tables WHERE schemaname NOT LIKE 'pg_%' AND schemaname != 'information_schema') 
+    LOOP
+        EXECUTE FORMAT('SELECT COUNT(*) FROM %I.%I', table_record.schemaname, table_record.tablename) INTO table_record.NumeroDeLinhas;
+
+        EXECUTE FORMAT('SELECT pg_size_pretty(pg_total_relation_size(%I.%I))', table_record.schemaname, table_record.tablename) INTO total_size_bytes;
+        table_record.EspacoTotalKB := total_size_bytes / 1024;
+
+        EXECUTE FORMAT('SELECT pg_size_pretty(pg_size_pretty(pg_total_relation_size(%I.%I) - pg_relation_size(%I.%I)))', table_record.schemaname, table_record.tablename, table_record.schemaname, table_record.tablename) INTO table_record.EspacoLivreKB;
+
+        EXECUTE FORMAT('SELECT pg_size_pretty(pg_size_pretty(pg_relation_size(%I.%I)))', table_record.schemaname, table_record.tablename) INTO table_record.EspacoUsadoKB;
+
+        EXECUTE FORMAT('SELECT pg_size_pretty(pg_size_pretty(pg_total_relation_size(%I.%I) - pg_relation_size(%I.%I) + pg_indexes_size(%I.%I)))', table_record.schemaname, table_record.tablename, table_record.schemaname, table_record.tablename, table_record.schemaname, table_record.tablename) INTO table_record.EspacoUsadoPorDadosKB;
+
+        EXECUTE FORMAT('SELECT pg_size_pretty(pg_indexes_size(%I.%I))', table_record.schemaname, table_record.tablename) INTO table_record.EspacoUsadoPorIndicesKB;
+
+        RAISE NOTICE '% | % | % | % | % | % | %',
+                     table_record.schemaname || '.' || table_record.tablename,
+                     table_record.NumeroDeLinhas,
+                     table_record.EspacoTotalKB,
+                     table_record.EspacoUsadoKB,
+                     table_record.EspacoLivreKB,
+                     table_record.EspacoUsadoPorDadosKB,
+                     table_record.EspacoUsadoPorIndicesKB;
+    END LOOP;
+END $$;
