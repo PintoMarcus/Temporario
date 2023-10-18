@@ -1,0 +1,30 @@
+......
+Logo depois da instrução INSERT, você tem um bloco adicional de código SQL Server, que não é válido no PostgreSQL. Aqui estão as partes desse bloco:
+
+a. DECLARE @CODIGO DECIMAL(10,0) - Esta linha declara uma variável chamada "@CODIGO" como um número decimal no SQL Server com precisão de 10 dígitos. No PostgreSQL, você não declara variáveis dessa maneira. Além disso, esse bloco de código não é necessário para uma procedure no PostgreSQL.
+
+b. SET @CODIGO = SCOPE_IDENTITY() - No SQL Server, essa linha define o valor da variável "@CODIGO" como o valor da identidade gerado pela última instrução INSERT. No PostgreSQL, você normalmente usa a cláusula "RETURNING" em uma instrução INSERT para obter o valor gerado pela sequência (equivalente à identidade do SQL Server) e, em seguida, o valor é retornado como parte do resultado da instrução INSERT.
+
+c. SELECT CONVERT(INT, @CODIGO) - No SQL Server, essa linha converte o valor da variável "@CODIGO" para um inteiro. No PostgreSQL, você não precisa fazer essa conversão.
+
+
+Para tornar essa procedure compatível com o PostgreSQL, você precisaria fazer as seguintes alterações:
+
+Remova o bloco de código SQL Server que não é relevante para o PostgreSQL.
+Use a cláusula "RETURNING" ao inserir dados na tabela "LOG_ERRO" para obter o valor gerado pela sequência, se aplicável.
+A procedure resultante seria escrita em PL/pgSQL e específica para o PostgreSQL.
+.....
+
+DECLARE
+    v_codigo integer;
+BEGIN
+....
+RETURNING id INTO v_codigo;
+    
+    -- O valor gerado pela sequência foi retornado em v_codigo
+    -- Você pode usá-lo conforme necessário
+    
+    -- Exemplo de retorno do valor
+    RETURN v_codigo;
+
+    
