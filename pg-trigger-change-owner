@@ -1,4 +1,7 @@
 --
+SELECT tgname FROM pg_trigger WHERE tgname = 'change_owner_trigger';
+
+--
 CREATE OR REPLACE FUNCTION change_owner()
 RETURNS event_trigger
 LANGUAGE plpgsql
