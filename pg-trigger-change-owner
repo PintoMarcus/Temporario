@@ -17,6 +17,7 @@ BEGIN
 END;
 $$;
 
+
 /*
 Primeiro, você precisará criar uma função que será chamada pelo TRIGGER para alterar o proprietário do objeto. Aqui está um exemplo de função:
 
