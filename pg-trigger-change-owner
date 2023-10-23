@@ -1,26 +1,29 @@
-
-
-
---
 CREATE OR REPLACE FUNCTION change_owner()
-RETURNS void
+RETURNS event_trigger
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    schema_name text;
-    object_name text;
+    obj record;
 BEGIN
-    FOR schema_name, object_name IN
-        SELECT table_schema, table_name
-        FROM information_schema.tables
-        WHERE table_schema = 'dbo'
-    LOOP
-        -- Altera o proprietário para 'dbo'
-        EXECUTE 'ALTER TABLE ' || schema_name || '.' || object_name || ' OWNER TO dbo';
+    FOR obj IN (SELECT objid, classid, objsubid FROM pg_event_trigger_ddl_commands()) LOOP
+        -- Verifica se o objeto pertence ao schema 'dbo'
+        IF (SELECT nspname FROM pg_namespace WHERE oid = obj.objid) = 'dbo' THEN
+            -- Altera o proprietário para 'dbo'
+            EXECUTE 'ALTER ' || CASE
+                WHEN obj.classid = 'pg_class'::regclass THEN 'TABLE'
+                WHEN obj.classid = 'pg_proc'::regclass THEN 'FUNCTION'
+                WHEN obj.classid = 'pg_namespace'::regclass THEN 'SCHEMA'
+                WHEN obj.classid = 'pg_view'::regclass THEN 'VIEW'
+                END || ' ' || obj.objid || ' OWNER TO dbo';
+        END IF;
     END LOOP;
 END;
 $$;
 
+-- Cria a trigger para executar a função 'change_owner' no final de comandos DDL
+CREATE EVENT TRIGGER change_owner_trigger
+    ON ddl_command_end
+    EXECUTE FUNCTION change_owner();
 
 
 /*
@@ -34,11 +37,6 @@ Agora, você pode criar o TRIGGER para chamar a função change_owner:
 
 
 */
-
---
-CREATE EVENT TRIGGER change_owner_trigger
-    ON ddl_command_end
-    EXECUTE FUNCTION change_owner();
 
 
 ---
