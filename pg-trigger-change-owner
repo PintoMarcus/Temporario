@@ -1,5 +1,5 @@
---
-SELECT tgname FROM pg_trigger WHERE tgname = 'change_owner_trigger';
+
+
 
 --
 CREATE OR REPLACE FUNCTION change_owner()
@@ -33,3 +33,15 @@ Agora, você pode criar o TRIGGER para chamar a função change_owner:
 CREATE EVENT TRIGGER change_owner_trigger
     ON ddl_command_end
     EXECUTE FUNCTION change_owner();
+
+
+---
+--
+SELECT tgname FROM pg_trigger WHERE tgname = 'change_owner_trigger';
+
+-- Listar todas as triggers de evento no banco de dados
+SELECT evtname, evtevent, evtowner
+FROM pg_event_trigger;
+
+-- Excluir a trigger "change_owner_trigger"
+DROP EVENT TRIGGER IF EXISTS change_owner_trigger;
