@@ -1,0 +1,32 @@
+--
+CREATE OR REPLACE FUNCTION change_owner()
+RETURNS event_trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF TG_TAG = 'CREATE TABLE' OR TG_TAG = 'CREATE VIEW' OR TG_TAG = 'CREATE PROCEDURE' THEN
+        -- Verifica se o objeto criado pertence ao schema 'dbo'
+        IF TG_TABLE_SCHEMA = 'dbo' THEN
+            -- Altera o proprietário para 'dbo'
+            EXECUTE 'ALTER ' || TG_TAG || ' ' || TG_TABLE_NAME || ' OWNER TO dbo';
+        END IF;
+    END IF;
+END;
+$$;
+
+/*
+Primeiro, você precisará criar uma função que será chamada pelo TRIGGER para alterar o proprietário do objeto. Aqui está um exemplo de função:
+
+Esta função verifica o tipo de objeto (tabela, visualização ou procedimento) criado e se ele pertence ao schema "dbo". Se ambas as condições forem atendidas, ela executa a instrução ALTER para alterar o proprietário para "dbo".
+
+Em seguida, você precisa criar o TRIGGER para chamar essa função sempre que um evento de criação ocorrer. Para isso, você deve habilitar os eventos de DDL (Data Definition Language) no PostgreSQL. No arquivo de configuração postgresql.conf, verifique se a opção track_functions está definida como 'all'.
+
+Agora, você pode criar o TRIGGER para chamar a função change_owner:
+
+
+*/
+
+--
+CREATE EVENT TRIGGER change_owner_trigger
+    ON ddl_command_end
+    EXECUTE FUNCTION change_owner();
