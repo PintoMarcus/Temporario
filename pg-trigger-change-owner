@@ -1,6 +1,7 @@
 https://www.manageengine.com/products/desktop-central/software-installation/silent_install_PostgreSQL-15-(15.3).html
 
 https://www.virustotal.com/gui/file/51dcc6385b5a936bb2ad73c514672c4ee6e9603296599a78b6eb6a6c2f58341d/details
+https://www.virustotal.com/gui/file/51dcc6385b5a936bb2ad73c514672c4ee6e9603296599a78b6eb6a6c2f58341d?nocache=1
 
 CREATE OR REPLACE FUNCTION change_owner()
 RETURNS event_trigger
