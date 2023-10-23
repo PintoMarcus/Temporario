@@ -3,19 +3,24 @@
 
 --
 CREATE OR REPLACE FUNCTION change_owner()
-RETURNS event_trigger
+RETURNS void
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    schema_name text;
+    object_name text;
 BEGIN
-    IF TG_TAG = 'CREATE TABLE' OR TG_TAG = 'CREATE VIEW' OR TG_TAG = 'CREATE PROCEDURE' THEN
-        -- Verifica se o objeto criado pertence ao schema 'dbo'
-        IF TG_TABLE_SCHEMA = 'dbo' THEN
-            -- Altera o proprietário para 'dbo'
-            EXECUTE 'ALTER ' || TG_TAG || ' ' || TG_TABLE_NAME || ' OWNER TO dbo';
-        END IF;
-    END IF;
+    FOR schema_name, object_name IN
+        SELECT table_schema, table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'dbo'
+    LOOP
+        -- Altera o proprietário para 'dbo'
+        EXECUTE 'ALTER TABLE ' || schema_name || '.' || object_name || ' OWNER TO dbo';
+    END LOOP;
 END;
 $$;
+
 
 
 /*
