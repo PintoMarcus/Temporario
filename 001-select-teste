@@ -3,3 +3,20 @@ FROM TB1 A
 INNER JOIN TB2 B ON A.INV = B.INV
 WHERE B.FDO = 132
 GROUP BY A.UF;
+
+
+Os níveis de isolamento TRANSACTION_REPEATABLE_READ e TRANSACTION_SNAPSHOT são diferentes em relação à forma como controlam o isolamento das transações no SQL Server, e podem ter implicações de desempenho distintas, dependendo dos requisitos da sua aplicação.
+
+TRANSACTION_REPEATABLE_READ:
+
+No nível TRANSACTION_REPEATABLE_READ, as transações impedem a inserção, exclusão ou atualização de dados afetados por outras transações enquanto a primeira transação não for concluída.
+Isso é alcançado usando bloqueios de linha e bloqueios exclusivos, o que pode causar bloqueios de leitura e gravar conflitos, afetando o desempenho, especialmente em sistemas com muitas transações simultâneas.
+TRANSACTION_SNAPSHOT:
+
+No nível TRANSACTION_SNAPSHOT, o SQL Server não usa bloqueios para controlar o isolamento, mas sim o mecanismo de isolamento de instantâneo (snapshot). Ele fornece cada transação com uma versão consistente dos dados, como se fosse uma "foto" do banco de dados no momento em que a transação começou.
+Isso significa que as transações não bloqueiam umas às outras para leitura. Portanto, o desempenho tende a ser melhor, especialmente em cenários com muitas leituras concorrentes.
+Qual é mais performático depende do uso e dos requisitos da sua aplicação. O TRANSACTION_SNAPSHOT tende a ser mais eficiente em termos de desempenho para leituras concorrentes, especialmente em ambientes com muitas transações simultâneas, porque evita bloqueios de leitura. No entanto, ele pode consumir mais espaço em disco para manter as versões dos dados.
+
+O TRANSACTION_REPEATABLE_READ, por outro lado, é mais estrito em termos de isolamento e pode ser necessário se você precisar de transações que garantam que os dados não mudem entre as leituras. Porém, isso pode causar bloqueios e afetar o desempenho em cenários com muitas atualizações concorrentes.
+
+A escolha entre eles depende das necessidades específicas da sua aplicação. Avalie as demandas de isolamento, o volume de leituras e gravações simultâneas e o espaço em disco disponível para determinar qual nível de isolamento é mais adequado ao seu caso.
