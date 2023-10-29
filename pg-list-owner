@@ -1,38 +1,5 @@
-SELECT
-    n.nspname AS schema_name,
-    c.relname AS table_name,
-    CASE
-        WHEN c.relkind = 'r' THEN 'Tabela'
-        WHEN c.relkind = 'v' THEN 'Visão'
-        WHEN c.relkind = 'm' THEN 'Materialized View'
-        WHEN c.relkind = 'i' THEN 'Índice'
-        WHEN c.relkind = 'S' THEN 'Sequência'
-        WHEN c.relkind = 's' THEN 'Sequência'
-        WHEN c.relkind = 'f' THEN 'Tabela de Foreign Key'
-        ELSE c.relkind
-    END AS object_type,
-    u.usename AS owner
-FROM pg_class c
-JOIN pg_namespace n ON n.oid = c.relnamespace
-JOIN pg_user u ON u.usesysid = c.relowner
-WHERE c.relkind IN ('r', 'v', 'm', 'i', 'S', 's', 'f')
-ORDER BY n.nspname, c.relname;
-
-
-----
 SELECT 
-    schemaname AS schema_name,
-    tablename AS object_name,
-    CASE 
-        WHEN relkind = 'r' THEN 'Tabela'
-        WHEN relkind = 'v' THEN 'Visão'
-        WHEN relkind = 'm' THEN 'Materialized View'
-        WHEN relkind = 'i' THEN 'Índice'
-        WHEN relkind = 'S' THEN 'Sequência'
-        WHEN relkind = 's' THEN 'Sequência'
-        WHEN relkind = 'f' THEN 'Tabela de Foreign Key'
-        ELSE relkind
-    END AS object_type
-FROM pg_tables
-WHERE tableowner = 'marcus';
+    proname AS procedure_name
+FROM pg_catalog.pg_proc
+WHERE pronamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'dbo');
 
