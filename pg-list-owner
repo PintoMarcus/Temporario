@@ -10,6 +10,24 @@ FROM pg_catalog.pg_tables
 WHERE schemaname = 'dbo' AND tableowner NOT IN ('dbo');
 
 
+
+
+SELECT
+    d.objid AS obj_id,
+    d.refobjid AS ref_obj_id,
+    CASE
+        WHEN d.classid = 'pg_class'::regclass THEN c.relname
+        WHEN d.classid = 'pg_proc'::regclass THEN p.proname
+        -- Adicione outras condições para tipos de objetos adicionais, se necessário
+        ELSE 'Desconhecido'
+    END AS object_name
+FROM pg_shdepend d
+LEFT JOIN pg_class c ON d.objid = c.oid AND d.classid = 'pg_class'::regclass
+LEFT JOIN pg_proc p ON d.objid = p.oid AND d.classid = 'pg_proc'::regclass
+-- Adicione outras junções com tabelas relevantes para tipos de objetos adicionais, se necessário
+WHERE d.objid = 'seu_objid_aqui' OR d.refobjid = 'seu_refobjid_aqui';
+
+
 SELECT 'ALTER FUNCTION ' || n.nspname || '.' || proname || ' OWNER TO dbo;'
 FROM pg_proc p
 JOIN pg_namespace n ON n.oid = p.pronamespace
