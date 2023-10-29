@@ -49,6 +49,157 @@ WHERE d.objid = 'seu_objid_aqui' OR d.refobjid = 'seu_refobjid_aqui';
 
 
 
+
+
+-- Consulta para encontrar o objeto que impede a exclusão da role "igor"
+WITH ObjectDetails AS (
+    SELECT
+        CASE
+            WHEN refclassid = 'pg_class'::regclass THEN 'Tabela'
+            WHEN refclassid = 'pg_proc'::regclass THEN 'Procedimento/Função'
+            WHEN refclassid = 'pg_opclass'::regclass THEN 'Classe de Operador'
+            WHEN refclassid = 'pg_am'::regclass THEN 'Método de Acesso'
+            WHEN refclassid = 'pg_opfamily'::regclass THEN 'Família de Operador'
+            -- Adicione outras condições para tipos de objetos adicionais, se necessário
+            ELSE 'Desconhecido'
+        END AS object_type,
+        CASE
+            WHEN classid = 'pg_class'::regclass THEN (
+                SELECT relname FROM pg_class WHERE oid = objid
+            )
+            WHEN classid = 'pg_proc'::regclass THEN (
+                SELECT proname FROM pg_proc WHERE oid = objid
+            )
+            WHEN classid = 'pg_opclass'::regclass THEN (
+                SELECT opcname FROM pg_opclass WHERE oid = objid
+            )
+            WHEN classid = 'pg_am'::regclass THEN (
+                SELECT amname FROM pg_am WHERE oid = objid
+            )
+            WHEN classid = 'pg_opfamily'::regclass THEN (
+                SELECT opfname FROM pg_opfamily WHERE oid = objid
+            )
+            -- Adicione outras condições para tipos de objetos adicionais, se necessário
+            ELSE 'Desconhecido'
+        END AS object_name
+    FROM pg_shdepend
+    WHERE refobjid = 774253 -- Substitua pelo valor de refobjid fornecido
+)
+SELECT * FROM ObjectDetails;
+
+
+
+
+
+
+WITH ObjectDetails AS (
+    SELECT
+        CASE
+            WHEN refclassid = 'pg_class'::regclass THEN 'Tabela'
+            WHEN refclassid = 'pg_proc'::regclass THEN 'Procedimento/Função'
+            WHEN refclassid = 'pg_opclass'::regclass THEN 'Classe de Operador'
+            WHEN refclassid = 'pg_am'::regclass THEN 'Método de Acesso'
+            WHEN refclassid = 'pg_opfamily'::regclass THEN 'Família de Operador'
+            WHEN refclassid = 'pg_aggregate'::regclass THEN 'Agregado'
+            WHEN refclassid = 'pg_constraint'::regclass THEN 'Restrição'
+            WHEN refclassid = 'pg_conversion'::regclass THEN 'Conversão'
+            WHEN refclassid = 'pg_enum'::regclass THEN 'Enumeração'
+            WHEN refclassid = 'pg_foreign_data_wrapper'::regclass THEN 'Wrapper de Dados Estrangeiros'
+            WHEN refclassid = 'pg_foreign_server'::regclass THEN 'Servidor de Dados Estrangeiros'
+            WHEN refclassid = 'pg_foreign_table'::regclass THEN 'Tabela de Dados Estrangeiros'
+            WHEN refclassid = 'pg_language'::regclass THEN 'Linguagem'
+            WHEN refclassid = 'pg_operator'::regclass THEN 'Operador'
+            WHEN refclassid = 'pg_opfamily'::regclass THEN 'Família de Operador'
+            WHEN refclassid = 'pg_opclass'::regclass THEN 'Classe de Operador'
+            WHEN refclassid = 'pg_rewrite'::regclass THEN 'Reescrita'
+            WHEN refclassid = 'pg_statistic'::regclass THEN 'Estatísticas'
+            WHEN refclassid = 'pg_tablespace'::regclass THEN 'Tablespace'
+            WHEN refclassid = 'pg_trigger'::regclass THEN 'Gatilho'
+            WHEN refclassid = 'pg_type'::regclass THEN 'Tipo de Dados'
+            WHEN refclassid = 'pg_user_mapping'::regclass THEN 'Mapeamento de Usuário'
+            ELSE 'Desconhecido'
+        END AS object_type,
+        CASE
+            WHEN classid = 'pg_class'::regclass THEN (
+                SELECT relname FROM pg_class WHERE oid = objid
+            )
+            WHEN classid = 'pg_proc'::regclass THEN (
+                SELECT proname FROM pg_proc WHERE oid = objid
+            )
+            WHEN classid = 'pg_opclass'::regclass THEN (
+                SELECT opcname FROM pg_opclass WHERE oid = objid
+            )
+            WHEN classid = 'pg_am'::regclass THEN (
+                SELECT amname FROM pg_am WHERE oid = objid
+            )
+            WHEN classid = 'pg_opfamily'::regclass THEN (
+                SELECT opfname FROM pg_opfamily WHERE oid = objid
+            )
+            WHEN classid = 'pg_aggregate'::regclass THEN (
+                SELECT aggname FROM pg_aggregate WHERE oid = objid
+            )
+            WHEN classid = 'pg_constraint'::regclass THEN (
+                SELECT conname FROM pg_constraint WHERE oid = objid
+            )
+            WHEN classid = 'pg_conversion'::regclass THEN (
+                SELECT conname FROM pg_conversion WHERE oid = objid
+            )
+            WHEN classid = 'pg_enum'::regclass THEN (
+                SELECT enumlabel FROM pg_enum WHERE enumtypid = objid
+            )
+            WHEN classid = 'pg_foreign_data_wrapper'::regclass THEN (
+                SELECT fdwname FROM pg_foreign_data_wrapper WHERE oid = objid
+            )
+            WHEN classid = 'pg_foreign_server'::regclass THEN (
+                SELECT srvname FROM pg_foreign_server WHERE oid = objid
+            )
+            WHEN classid = 'pg_foreign_table'::regclass THEN (
+                SELECT relname FROM pg_class WHERE oid = objid
+            )
+            WHEN classid = 'pg_language'::regclass THEN (
+                SELECT lanname FROM pg_language WHERE oid = objid
+            )
+            WHEN classid = 'pg_operator'::regclass THEN (
+                SELECT oprname FROM pg_operator WHERE oid = objid
+            )
+            WHEN classid = 'pg_opfamily'::regclass THEN (
+                SELECT opfname FROM pg_opfamily WHERE oid = objid
+            )
+            WHEN classid = 'pg_opclass'::regclass THEN (
+                SELECT opcname FROM pg_opclass WHERE oid = objid
+            )
+            WHEN classid = 'pg_rewrite'::regclass THEN (
+                SELECT rulename FROM pg_rewrite WHERE oid = objid
+            )
+            WHEN classid = 'pg_statistic'::regclass THEN (
+                SELECT starelid FROM pg_statistic WHERE oid = objid
+            )
+            WHEN classid = 'pg_tablespace'::regclass THEN (
+                SELECT spcname FROM pg_tablespace WHERE oid = objid
+            )
+            WHEN classid = 'pg_trigger'::regclass THEN (
+                SELECT tgname FROM pg_trigger WHERE oid = objid
+            )
+            WHEN classid = 'pg_type'::regclass THEN (
+                SELECT typname FROM pg_type WHERE oid = objid
+            )
+            WHEN classid = 'pg_user_mapping'::regclass THEN (
+                SELECT srvname FROM pg_foreign_server WHERE oid = objid
+            )
+            ELSE 'Desconhecido'
+        END AS object_name
+    FROM pg_shdepend
+    WHERE refobjid = 774253 -- Substitua pelo valor de refobjid fornecido
+)
+SELECT * FROM ObjectDetails;
+
+
+
+
+
+
+
+
 SELECT 'ALTER FUNCTION ' || n.nspname || '.' || proname || ' OWNER TO dbo;'
 FROM pg_proc p
 JOIN pg_namespace n ON n.oid = p.pronamespace
