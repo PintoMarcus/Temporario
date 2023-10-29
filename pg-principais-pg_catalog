@@ -1,0 +1,12 @@
+pg_catalog.pg_proc
+pg_catalog.pg_tables
+pg_catalog.pg_namespace
+pg_catalog.pg_index
+pg_catalog.pg_trigger
+pg_catalog.pg_views
+pg_catalog.pg_user
+pg_catalog.pg_roles
+pg_catalog.pg_type
+pg_catalog.pg_class
+pg_catalog.pg_constraint
+pg_catalog.pg_stat_activity
