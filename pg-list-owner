@@ -5,6 +5,18 @@ WHERE pronamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'd
 
 
 
+SELECT 'ALTER TABLE ' || schemaname || '.' || tablename || ' OWNER TO dbo;'
+FROM pg_catalog.pg_tables
+WHERE schemaname = 'dbo' AND tableowner NOT IN ('dbo');
+
+
+SELECT 'ALTER FUNCTION ' || n.nspname || '.' || proname || ' OWNER TO dbo;'
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'dbo';
+
+
+
 
 
 SELECT 
