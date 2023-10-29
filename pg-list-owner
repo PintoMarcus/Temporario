@@ -7,7 +7,7 @@ WHERE pronamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'd
 
 
 
-SELECT
+SELECT 
     n.nspname AS schema_name,
     c.relname AS object_name,
     CASE
@@ -20,11 +20,42 @@ SELECT
         WHEN c.relkind = 'f' THEN 'Tabela de Foreign Key'
         ELSE c.relkind
     END AS object_type,
-    u.usename AS owner
+    CASE 
+        WHEN u.rolname IS NOT NULL THEN u.rolname
+        ELSE u.usename
+    END AS owner
 FROM pg_class c
 JOIN pg_namespace n ON n.oid = c.relnamespace
+LEFT JOIN pg_roles u ON u.oid = c.relowner
+ORDER BY n.nspname, c.relname;
+
+
+
+
+SELECT
+    n.nspname AS schema_name,
+    c.relname AS object_name,
+    CASE
+        WHEN c.relkind = 'r' THEN 'Tabela'
+        WHEN c.relkind = 'v' THEN 'Visão'
+        WHEN c.relkind = 'm' THEN 'Materialized View'
+        WHEN c.relkind = 'i' THEN 'Índice'
+        WHEN c.relkind = 'S' THEN 'Sequência'
+        WHEN c.relkind = 's' THEN 'Sequência'
+        WHEN c.relkind = 'f' THEN 'Tabela de Foreign Key'
+        WHEN p.prokind = 'f' THEN 'Função Estrangeira'
+        WHEN p.prokind = 'p' THEN 'Procedimento'
+        WHEN p.prokind = 'a' THEN 'Agregado'
+        ELSE c.relkind
+    END AS object_type,
+    u.usename AS owner
+FROM pg_class c
+LEFT JOIN pg_proc p ON c.oid = p.prorelid
+JOIN pg_namespace n ON n.oid = c.relnamespace
 JOIN pg_user u ON u.usesysid = c.relowner
-WHERE n.nspname = 'dbo' AND u.usename <> 'dbo';
+WHERE u.usename = 'marcus'
+ORDER BY n.nspname, c.relname;
+
 
 
 
