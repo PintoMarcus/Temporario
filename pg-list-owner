@@ -11,21 +11,28 @@ WHERE schemaname = 'dbo' AND tableowner NOT IN ('dbo');
 
 
 
-
 SELECT
     d.objid AS obj_id,
     d.refobjid AS ref_obj_id,
     CASE
         WHEN d.classid = 'pg_class'::regclass THEN c.relname
         WHEN d.classid = 'pg_proc'::regclass THEN p.proname
+        WHEN d.classid = 'pg_opclass'::regclass THEN o.opcname
+        WHEN d.classid = 'pg_am'::regclass THEN a.amname
+        WHEN d.classid = 'pg_opfamily'::regclass THEN of.opfname
         -- Adicione outras condições para tipos de objetos adicionais, se necessário
         ELSE 'Desconhecido'
     END AS object_name
 FROM pg_shdepend d
 LEFT JOIN pg_class c ON d.objid = c.oid AND d.classid = 'pg_class'::regclass
 LEFT JOIN pg_proc p ON d.objid = p.oid AND d.classid = 'pg_proc'::regclass
+LEFT JOIN pg_opclass o ON d.objid = o.oid AND d.classid = 'pg_opclass'::regclass
+LEFT JOIN pg_am a ON d.objid = a.oid AND d.classid = 'pg_am'::regclass
+LEFT JOIN pg_opfamily of ON d.objid = of.oid AND d.classid = 'pg_opfamily'::regclass
 -- Adicione outras junções com tabelas relevantes para tipos de objetos adicionais, se necessário
 WHERE d.objid = 'seu_objid_aqui' OR d.refobjid = 'seu_refobjid_aqui';
+
+
 
 
 SELECT 'ALTER FUNCTION ' || n.nspname || '.' || proname || ' OWNER TO dbo;'
