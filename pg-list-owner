@@ -5,6 +5,7 @@ WHERE pronamespace = (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'd
 
 
 
+-- Listar objetos que dependem da role
 SELECT
     n.nspname AS schema_name,
     c.relname AS object_name,
@@ -21,5 +22,24 @@ SELECT
 FROM pg_depend d
 JOIN pg_class c ON d.objid = c.oid
 JOIN pg_namespace n ON n.oid = c.relnamespace
-WHERE d.refobjid = (SELECT usesysid FROM pg_user WHERE usename = 'nome_da_role_a_ser_excluida');
+WHERE d.refobjid = (SELECT usesysid FROM pg_user WHERE usename = 'nome_da_role_a_ser_excluida')
 
+UNION
+
+-- Listar objetos em que a role é proprietária
+SELECT
+    n.nspname AS schema_name,
+    c.relname AS object_name,
+    CASE
+        WHEN c.relkind = 'r' THEN 'Tabela'
+        WHEN c.relkind = 'v' THEN 'Visão'
+        WHEN c.relkind = 'm' THEN 'Materialized View'
+        WHEN c.relkind = 'i' THEN 'Índice'
+        WHEN c.relkind = 'S' THEN 'Sequência'
+        WHEN c.relkind = 's' THEN 'Sequência'
+        WHEN c.relkind = 'f' THEN 'Tabela de Foreign Key'
+        ELSE c.relkind
+    END AS object_type
+FROM pg_class c
+JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE c.relowner = (SELECT usesysid FROM pg_user WHERE usename = 'nome_da_role_a_ser_excluida');
