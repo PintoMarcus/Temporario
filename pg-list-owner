@@ -10,7 +10,6 @@ FROM pg_catalog.pg_tables
 WHERE schemaname = 'dbo' AND tableowner NOT IN ('dbo');
 
 
-
 SELECT
     d.objid AS obj_id,
     d.refobjid AS ref_obj_id,
@@ -20,6 +19,13 @@ SELECT
         WHEN d.classid = 'pg_opclass'::regclass THEN o.opcname
         WHEN d.classid = 'pg_am'::regclass THEN a.amname
         WHEN d.classid = 'pg_opfamily'::regclass THEN of.opfname
+        WHEN d.classid = 'pg_aggregate'::regclass THEN ag.aggname
+        WHEN d.classid = 'pg_constraint'::regclass THEN con.conname
+        WHEN d.classid = 'pg_foreign_table'::regclass THEN ft.relname
+        WHEN d.classid = 'pg_matviews'::regclass THEN mv.relname
+        WHEN d.classid = 'pg_rewrite'::regclass THEN r.rulename
+        WHEN d.classid = 'pg_trigger'::regclass THEN tr.tgname
+        WHEN d.classid = 'pg_type'::regclass THEN t.typname
         -- Adicione outras condições para tipos de objetos adicionais, se necessário
         ELSE 'Desconhecido'
     END AS object_name
@@ -29,8 +35,16 @@ LEFT JOIN pg_proc p ON d.objid = p.oid AND d.classid = 'pg_proc'::regclass
 LEFT JOIN pg_opclass o ON d.objid = o.oid AND d.classid = 'pg_opclass'::regclass
 LEFT JOIN pg_am a ON d.objid = a.oid AND d.classid = 'pg_am'::regclass
 LEFT JOIN pg_opfamily of ON d.objid = of.oid AND d.classid = 'pg_opfamily'::regclass
--- Adicione outras junções com tabelas relevantes para tipos de objetos adicionais, se necessário
+LEFT JOIN pg_aggregate ag ON d.objid = ag.oid AND d.classid = 'pg_aggregate'::regclass
+LEFT JOIN pg_constraint con ON d.objid = con.oid AND d.classid = 'pg_constraint'::regclass
+LEFT JOIN pg_class ft ON d.objid = ft.oid AND d.classid = 'pg_foreign_table'::regclass
+LEFT JOIN pg_class mv ON d.objid = mv.oid AND d.classid = 'pg_matviews'::regclass
+LEFT JOIN pg_rewrite r ON d.objid = r.oid AND d.classid = 'pg_rewrite'::regclass
+LEFT JOIN pg_trigger tr ON d.objid = tr.oid AND d.classid = 'pg_trigger'::regclass
+LEFT JOIN pg_type t ON d.objid = t.oid AND d.classid = 'pg_type'::regclass
+-- Adicione outras junções e condições para tipos de objetos adicionais, se necessário
 WHERE d.objid = 'seu_objid_aqui' OR d.refobjid = 'seu_refobjid_aqui';
+
 
 
 
