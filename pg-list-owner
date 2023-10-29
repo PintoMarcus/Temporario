@@ -17,3 +17,24 @@ JOIN pg_namespace n ON n.oid = c.relnamespace
 JOIN pg_user u ON u.usesysid = c.relowner
 WHERE c.relkind IN ('r', 'v', 'm', 'i', 'S', 's', 'f')
 ORDER BY n.nspname, c.relname;
+
+
+----
+SELECT 
+    n.nspname AS schema_name,
+    c.relname AS object_name,
+    CASE 
+        WHEN c.relkind = 'r' THEN 'Tabela'
+        WHEN c.relkind = 'v' THEN 'Visão'
+        WHEN c.relkind = 'm' THEN 'Materialized View'
+        WHEN c.relkind = 'i' THEN 'Índice'
+        WHEN c.relkind = 'S' THEN 'Sequência'
+        WHEN c.relkind = 's' THEN 'Sequência'
+        WHEN c.relkind = 'f' THEN 'Tabela de Foreign Key'
+        ELSE c.relkind
+    END AS object_type
+FROM pg_class c
+JOIN pg_namespace n ON n.oid = c.relnamespace
+JOIN pg_user u ON u.usesysid = c.relowner
+WHERE u.usename = 'marcus'
+ORDER BY n.nspname, c.relname;
