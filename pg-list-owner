@@ -18,6 +18,38 @@ WHERE n.nspname = 'dbo';
 
 
 
+SELECT
+    CASE
+        WHEN d.refclassid = 'pg_class'::regclass THEN 'Tabela'
+        WHEN d.refclassid = 'pg_proc'::regclass THEN 'Procedimento/Função'
+        WHEN d.refclassid = 'pg_opclass'::regclass THEN 'Classe de Operador'
+        WHEN d.refclassid = 'pg_am'::regclass THEN 'Método de Acesso'
+        WHEN d.refclassid = 'pg_opfamily'::regclass THEN 'Família de Operador'
+        ELSE 'Outro'
+    END AS object_type,
+    CASE
+        WHEN d.classid = 'pg_class'::regclass THEN (
+            SELECT relname FROM pg_class WHERE oid = d.objid
+        )
+        WHEN d.classid = 'pg_proc'::regclass THEN (
+            SELECT proname FROM pg_proc WHERE oid = d.objid
+        )
+        WHEN d.classid = 'pg_opclass'::regclass THEN (
+            SELECT opcname FROM pg_opclass WHERE oid = d.objid
+        )
+        WHEN d.classid = 'pg_am'::regclass THEN (
+            SELECT amname FROM pg_am WHERE oid = d.objid
+        )
+        WHEN d.classid = 'pg_opfamily'::regclass THEN (
+            SELECT opfname FROM pg_opfamily WHERE oid = d.objid
+        )
+        ELSE 'Desconhecido'
+    END AS object_name
+FROM pg_shdepend d
+WHERE d.refobjid = (SELECT oid FROM pg_class WHERE relname = 'seu_nome_de_objeto');
+
+
+
 
 SELECT 
     n.nspname AS schema_name,
