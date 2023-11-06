@@ -374,3 +374,10 @@ LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE c.relkind IN ('r', 'v', 'm', 'i', 'S', 's', 'f')
 ORDER BY schema_name, object_name;
 
+
+
+SELECT *
+FROM pg_depend
+WHERE refobjid = pg_roles.oid
+AND refclassid = 'r'
+ORDER BY deptype;
