@@ -50,6 +50,25 @@ WHERE d.objid = 'seu_objid_aqui' OR d.refobjid = 'seu_refobjid_aqui';
 
 
 
+SELECT n.nspname AS schema_name, c.relname AS object_name, CASE
+  WHEN c.relkind = 'r' THEN 'Tabela'
+  WHEN c.relkind = 'v' THEN 'Visão'
+  WHEN c.relkind = 'i' THEN 'Índice'
+  WHEN c.relkind = 'S' THEN 'Sequência'
+  WHEN c.relkind = 's' THEN 'Sequência'
+  WHEN c.relkind = 'f' THEN 'Tabela de Foreign Key'
+  ELSE c.relkind
+END AS object_type
+FROM pg_depend d
+JOIN pg_class c ON d.objid = c.oid
+JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE d.refobjid = 798769;
+
+
+
+
+
+
 
 -- Consulta para encontrar o objeto que impede a exclusão da role "igor"
 WITH ObjectDetails AS (
