@@ -376,8 +376,9 @@ ORDER BY schema_name, object_name;
 
 
 
-SELECT *
-FROM pg_depend
-WHERE refobjid = pg_roles.oid
-AND refclassid = 'r'
-ORDER BY deptype;
+SELECT n.nspname AS schema_name, c.relname AS object_name, d.refclassid, d.refobjid
+FROM pg_depend d
+JOIN pg_class c ON d.objid = c.oid
+JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE d.classid = (SELECT oid FROM pg_class WHERE relname = 'pg_authid') AND d.refobjid = (SELECT oid FROM pg_roles WHERE rolname = 'nome_do_usuario');
+
