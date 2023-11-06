@@ -350,3 +350,27 @@ SELECT
 FROM pg_class c
 JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE c.relowner = (SELECT usesysid FROM pg_user WHERE usename = 'nome_da_role_a_ser_excluida');
+
+
+
+
+
+SELECT
+    n.nspname AS schema_name,
+    c.relname AS object_name,
+    CASE
+        WHEN c.relkind = 'r' THEN 'Tabela'
+        WHEN c.relkind = 'v' THEN 'Visão'
+        WHEN c.relkind = 'm' THEN 'Materialized View'
+        WHEN c.relkind = 'i' THEN 'Índice'
+        WHEN c.relkind = 'S' THEN 'Sequência'
+        WHEN c.relkind = 's' THEN 'Sequência'
+        WHEN c.relkind = 'f' THEN 'Tabela de Foreign Key'
+        ELSE c.relkind
+    END AS object_type,
+    pg_get_userbyid(c.relowner) AS owner
+FROM pg_class c
+LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE c.relkind IN ('r', 'v', 'm', 'i', 'S', 's', 'f')
+ORDER BY schema_name, object_name;
+
