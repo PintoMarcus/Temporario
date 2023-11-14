@@ -1,0 +1,7 @@
+{
+    "TableMappings": "{
+        \"NomeDaSuaTabela\": {
+            \"NomeDaSuaTabela\": [\"column2\", \"column3\", \"column4\", \"column5\"]
+        }
+    }"
+}
