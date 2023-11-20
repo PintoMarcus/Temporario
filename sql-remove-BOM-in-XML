@@ -1,0 +1,13 @@
+-- exemplo de comando para remoção do BOM em colunas do tipo XML
+UPDATE my_tab_01
+SET col_01 = CASE 
+               WHEN col_01 LIKE '<?xml%'
+               THEN STUFF(col_01, 1, CHARINDEX('<', col_01) - 1, '')
+               ELSE col_01
+             END,
+    col_02 = CASE 
+               WHEN col_02 LIKE '<?xml%'
+               THEN STUFF(col_02, 1, CHARINDEX('<', col_02) - 1, '')
+               ELSE col_02
+             END
+WHERE col_01 LIKE '<?xml%' OR col_02 LIKE '<?xml%';
