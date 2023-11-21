@@ -1,0 +1,47 @@
+# Insira o caminho do arquivo SQL
+$filePath = "C:\temp\teste_chk_constraint\tabelas-varios-schemas.sql"
+
+# Leitura do conteúdo do arquivo
+$fileContent = Get-Content -Path $filePath
+
+# Mapeamento das substituições
+$replacements = @{
+    "[dbo].[BAIRRO] NULL"             = "/* [dbo].[BAIRRO] */ [varchar] (15) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[CIDADE] NULL"             = "/* [dbo].[CIDADE] */[varchar] (25) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[COMPLEMENTO] NULL"        = "/* [dbo].[COMPLEMENTO] */[varchar] (15) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[CONTACORRENTE] NULL"      = "/* [dbo].[CONTACORRENTE]*/ [varchar] (10) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NOME] NULL"               = "/* [dbo].[NOME] */ [varchar] (20) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NOME_DEBENTURISTA] NULL"  = "/* [dbo].[NOME_DEBENTURISTA] */ [varchar] (40) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NOME_EXTENSO] NULL"       = "/* [dbo].[NOME_EXTENSO] */ [varchar] (40) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NOME_LOGRADOURO] NULL"    = "/* [dbo].[NOME_LOGRADOURO] */ [varchar] (40) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NR_LOGRADOURO] NULL"      = "/* [dbo].[NR_LOGRADOURO] */ [varchar] (5) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[RAZAO_SOCIAL] NULL"       = "/* [dbo].[RAZAO_SOCIAL] */ [varchar] (40) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[SERIE] NULL"              = "/* [dbo].[SERIE] */ [varchar] (5) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[UF] NULL"                 = "/* [dbo].[UF] */ [char] (2) NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[BAIRRO] NOT NULL"         = "/* [dbo].[BAIRRO] */ [varchar] (15) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[CIDADE] NOT NULL"         = "/* [dbo].[CIDADE] */[varchar] (25) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[COMPLEMENTO] NOT NULL"    = "/* [dbo].[COMPLEMENTO] */[varchar] (15) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[CONTACORRENTE] NOT NULL"  = "/* [dbo].[CONTACORRENTE]*/ [varchar] (10) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NOME] NOT NULL"           = "/* [dbo].[NOME] */ [varchar] (20) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NOME_DEBENTURISTA] NOT NULL" = "/* [dbo].[NOME_DEBENTURISTA] */ [varchar] (40) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NOME_EXTENSO] NOT NULL"   = "/* [dbo].[NOME_EXTENSO] */ [varchar] (40) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NOME_LOGRADOURO] NOT NULL" = "/* [dbo].[NOME_LOGRADOURO] */ [varchar] (40) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[NR_LOGRADOURO] NOT NULL"  = "/* [dbo].[NR_LOGRADOURO] */ [varchar] (5) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[RAZAO_SOCIAL] NOT NULL"   = "/* [dbo].[RAZAO_SOCIAL] */ [varchar] (40) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[SERIE] NOT NULL"          = "/* [dbo].[SERIE] */ [varchar] (5) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+    "[dbo].[UF] NOT NULL"             = "/* [dbo].[UF] */ [char] (2) NOT NULL collate sql_latin1_general_cp1_ci_ai"
+}
+
+# Loop através das linhas do arquivo
+for ($i = 0; $i -lt $fileContent.Length; $i++) {
+    foreach ($key in $replacements.Keys) {
+        # Verifica se a linha contém o padrão a ser substituído
+        if ($fileContent[$i] -match [regex]::Escape($key)) {
+            # Substituir o padrão pelo valor correspondente
+            $fileContent[$i] = $replacements[$key]
+        }
+    }
+}
+
+# Sobrescrever o arquivo com as alterações
+$fileContent | Out-File -FilePath $filePath -Encoding DEFAULT
