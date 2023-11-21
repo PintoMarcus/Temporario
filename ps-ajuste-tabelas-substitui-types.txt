@@ -38,7 +38,7 @@ for ($i = 0; $i -lt $fileContent.Length; $i++) {
         # Verifica se a linha contém o padrão a ser substituído
         if ($fileContent[$i] -match [regex]::Escape($key)) {
             # Substituir o padrão pelo valor correspondente
-            $fileContent[$i] = $replacements[$key]
+            $fileContent[$i] = $fileContent[$i] -replace [regex]::Escape($key), $replacements[$key]
         }
     }
 }
