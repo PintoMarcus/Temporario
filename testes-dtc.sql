@@ -22,3 +22,16 @@ ROLLBACK;
 
 -- Verificar Transações Distribuídas Ativas: ()
 SELECT * FROM sys.dm_tran_active_transactions WHERE is_local = 0;
+
+----
+USE AdventureWorks2022;
+GO
+BEGIN DISTRIBUTED TRANSACTION;
+-- Delete candidate from local instance.
+DELETE AdventureWorks2022.HumanResources.JobCandidate
+    WHERE JobCandidateID = 13;
+-- Delete candidate from remote instance.
+DELETE RemoteServer.AdventureWorks2022.HumanResources.JobCandidate
+    WHERE JobCandidateID = 13;
+COMMIT TRANSACTION;
+GO
