@@ -23,6 +23,24 @@ ROLLBACK;
 -- Verificar Transações Distribuídas Ativas: ()
 SELECT * FROM sys.dm_tran_active_transactions WHERE is_local = 0;
 
+
+
+--- testando com openquery
+BEGIN TRANSACTION;
+
+-- Substitua 'RemoteServer' pelo nome do servidor remoto
+-- Substitua 'DatabaseName' pelo nome do banco de dados remoto
+DECLARE @Sql NVARCHAR(MAX);
+SET @Sql = N'SELECT * FROM DatabaseName.SchemaName.TableName';
+
+-- Executa a transação distribuída usando OPENQUERY
+EXEC ('SELECT * FROM OPENQUERY(RemoteServer, ''' + @Sql + ''')');
+
+-- Commit ou Rollback da transação distribuída
+COMMIT; -- ou ROLLBACK;
+
+
+
 ----
 USE AdventureWorks2022;
 GO
