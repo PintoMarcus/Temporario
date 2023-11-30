@@ -41,30 +41,35 @@ COMMIT; -- ou ROLLBACK;
 
 
 -- testando com openquery 002
--- Inicia uma transação distribuída
-BEGIN DISTRIBUTED TRANSACTION;
+-- Criação da tabela temporária global
+CREATE TABLE ##TempTable (
+    -- Defina as colunas conforme a estrutura da tabela remota
+    Col1 INT,
+    Col2 VARCHAR(50),
+    -- Adicione outras colunas conforme necessário
+);
 
--- Substitua 'SRV_002.meudomini.abc' pelo nome do servidor remoto completo
--- Substitua 'sch1' pelo esquema no servidor remoto
--- Substitua 'mtb1' pela tabela no servidor remoto
-DECLARE @Sql NVARCHAR(MAX);
-SET @Sql = N'select top 10 * from [sch1].[mtb1]';
+-- Monta o comando SQL com OPENQUERY para popular a tabela temporária global
+SET @Sql = N'
+INSERT INTO ##TempTable
+SELECT TOP 10 * FROM OPENQUERY([SRV_002.meudomini.abc], ''' + @Sql + ''') AT [SRV_002.meudomini.abc]
+';
 
--- Executa a transação distribuída usando OPENQUERY
--- Cria uma tabela temporária no servidor local para armazenar os resultados
-EXEC ('SELECT * INTO #TempTable FROM OPENQUERY([SRV_002.meudomini.abc], ''' + @Sql + ''') AT [SRV_002.meudomini.abc]');
+-- Executa o comando SQL
+EXEC sp_executesql @Sql;
 
 -- Espera por 15 segundos
 WAITFOR DELAY '00:00:15';
 
--- Seleciona os resultados da tabela temporária
-SELECT * FROM #TempTable;
+-- Seleciona os resultados da tabela temporária global
+SELECT * FROM ##TempTable;
 
 -- Commit ou Rollback da transação distribuída
 COMMIT; -- ou ROLLBACK;
 
--- Limpa a tabela temporária após o uso
-DROP TABLE #TempTable;
+-- Limpa a tabela temporária global após o uso
+DROP TABLE ##TempTable;
+
 
 
 
