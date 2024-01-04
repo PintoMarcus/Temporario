@@ -7,7 +7,8 @@ DECLARE @GrantStatement NVARCHAR(MAX);
 -- Verifica se a role db_datareader existe, se não existir, cria
 IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @RoleName AND type = 'R')
 BEGIN
-    EXEC('CREATE ROLE ' + QUOTENAME(@RoleName));
+    --EXEC('CREATE ROLE ' + QUOTENAME(@RoleName));
+    --EXEC('CREATE ROLE ' + @RoleName);
     PRINT 'Role ' + @RoleName + ' criada com sucesso.';
 END
 ELSE
