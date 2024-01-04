@@ -4,6 +4,17 @@ DECLARE @SchemaName NVARCHAR(255);
 DECLARE @TableName NVARCHAR(255);
 DECLARE @GrantStatement NVARCHAR(MAX);
 
+-- Verifica se a role db_datareader existe, se não existir, cria
+IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @RoleName AND type = 'R')
+BEGIN
+    EXEC('CREATE ROLE ' + QUOTENAME(@RoleName));
+    PRINT 'Role ' + @RoleName + ' criada com sucesso.';
+END
+ELSE
+BEGIN
+    PRINT 'Role ' + @RoleName + ' já existe.';
+END
+
 -- Cursor para percorrer todas as tabelas do banco de dados
 DECLARE tableCursor CURSOR FOR
 SELECT 
