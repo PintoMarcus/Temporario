@@ -73,60 +73,9 @@ DROP TABLE #GrantCommands;
 
 
 /* +++++++++++++++++++++++++++++ */
--- usando while: tentativa 01
-
-DECLARE @DatabaseName NVARCHAR(255) = 'my_db';
-DECLARE @RoleName NVARCHAR(255) = 'db_datareader';
-DECLARE @SchemaName NVARCHAR(255);
-DECLARE @TableName NVARCHAR(255);
-DECLARE @GrantStatement NVARCHAR(MAX);
-DECLARE @Counter INT = 1;
-DECLARE @MaxCounter INT;
-
--- Verifica se a role db_datareader existe, se não existir, cria
-IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @RoleName AND type = 'R')
-BEGIN
-    --EXEC('CREATE ROLE ' + QUOTENAME(@RoleName));
-    --EXEC('CREATE ROLE ' + @RoleName);
-    PRINT 'Role ' + @RoleName + ' criada com sucesso.';
-END
-ELSE
-BEGIN
-    PRINT 'Role ' + @RoleName + ' já existe.';
-END
-
--- Obter o número total de tabelas
-SELECT @MaxCounter = COUNT(*)
-FROM sys.tables;
-
--- Loop através das tabelas
-WHILE @Counter <= @MaxCounter
-BEGIN
-    -- Obter o nome do esquema e da tabela
-    SELECT 
-        @SchemaName = schema_name(schema_id),
-        @TableName = name
-    FROM 
-        sys.tables
-    WHERE
-        object_id = @Counter;
-
-    -- Gera o comando GRANT
-    SET @GrantStatement = 
-        'GRANT SELECT ON ' + QUOTENAME(@DatabaseName) + '.' + 
-        QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) + ' TO ' + QUOTENAME(@RoleName);
-
-    -- Executa o comando GRANT
-    EXEC sp_executesql @GrantStatement;
-
-    -- Incrementa o contador
-    SET @Counter = @Counter + 1;
-END;
-
-
 
 /**********************************************************************************/
--- usando while tentativa 02
+-- usando while tentativa 01
 DECLARE @DatabaseName NVARCHAR(255) = 'my_db';
 DECLARE @RoleName NVARCHAR(255) = 'db_datareader';
 DECLARE @SchemaName NVARCHAR(255);
@@ -174,4 +123,72 @@ BEGIN
     -- Incrementa o contador
     SET @Counter = @Counter + 1;
 END;
+
+/*************************************/
+-- while tentativa 02
+DECLARE @DatabaseName NVARCHAR(255) = 'my_db';
+DECLARE @RoleName NVARCHAR(255) = 'db_datareader';
+DECLARE @SchemaName NVARCHAR(255);
+DECLARE @TableName NVARCHAR(255);
+DECLARE @GrantStatement NVARCHAR(MAX);
+
+-- Verifica se a role db_datareader existe, se não existir, cria
+IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @RoleName AND type = 'R')
+BEGIN
+    --EXEC('CREATE ROLE ' + QUOTENAME(@RoleName));
+    --EXEC('CREATE ROLE ' + @RoleName);
+    PRINT 'Role ' + @RoleName + ' criada com sucesso.';
+END
+ELSE
+BEGIN
+    PRINT 'Role ' + @RoleName + ' já existe.';
+END
+
+-- Tabela temporária para armazenar as informações das tabelas
+CREATE TABLE #TablesInfo
+(
+    RowNum INT IDENTITY(1, 1),
+    SchemaName NVARCHAR(255),
+    TableName NVARCHAR(255)
+);
+
+-- Preenche a tabela temporária com as informações das tabelas
+INSERT INTO #TablesInfo (SchemaName, TableName)
+SELECT 
+    SCHEMA_NAME(schema_id) AS SchemaName,
+    name AS TableName
+FROM 
+    sys.tables;
+
+-- Obter o número total de tabelas
+DECLARE @MaxCounter INT;
+SELECT @MaxCounter = MAX(RowNum) FROM #TablesInfo;
+
+-- Loop através das tabelas
+DECLARE @Counter INT = 1;
+WHILE @Counter <= @MaxCounter
+BEGIN
+    -- Obter o nome do esquema e da tabela
+    SELECT 
+        @SchemaName = SchemaName,
+        @TableName = TableName
+    FROM 
+        #TablesInfo
+    WHERE
+        RowNum = @Counter;
+
+    -- Gera o comando GRANT
+    SET @GrantStatement = 
+        'GRANT SELECT ON ' + QUOTENAME(@DatabaseName) + '.' + 
+        QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) + ' TO ' + QUOTENAME(@RoleName);
+
+    -- Executa o comando GRANT
+    EXEC sp_executesql @GrantStatement;
+
+    -- Incrementa o contador
+    SET @Counter = @Counter + 1;
+END;
+
+-- Limpa a tabela temporária
+DROP TABLE #TablesInfo;
 
