@@ -68,3 +68,58 @@ DEALLOCATE grantCursor;
 
 -- Limpa a tabela temporária
 DROP TABLE #GrantCommands;
+
+
+
+
+/* +++++++++++++++++++++++++++++ */
+-- usando while:
+
+DECLARE @DatabaseName NVARCHAR(255) = 'my_db';
+DECLARE @RoleName NVARCHAR(255) = 'db_datareader';
+DECLARE @SchemaName NVARCHAR(255);
+DECLARE @TableName NVARCHAR(255);
+DECLARE @GrantStatement NVARCHAR(MAX);
+DECLARE @Counter INT = 1;
+DECLARE @MaxCounter INT;
+
+-- Verifica se a role db_datareader existe, se não existir, cria
+IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @RoleName AND type = 'R')
+BEGIN
+    --EXEC('CREATE ROLE ' + QUOTENAME(@RoleName));
+    --EXEC('CREATE ROLE ' + @RoleName);
+    PRINT 'Role ' + @RoleName + ' criada com sucesso.';
+END
+ELSE
+BEGIN
+    PRINT 'Role ' + @RoleName + ' já existe.';
+END
+
+-- Obter o número total de tabelas
+SELECT @MaxCounter = COUNT(*)
+FROM sys.tables;
+
+-- Loop através das tabelas
+WHILE @Counter <= @MaxCounter
+BEGIN
+    -- Obter o nome do esquema e da tabela
+    SELECT 
+        @SchemaName = schema_name(schema_id),
+        @TableName = name
+    FROM 
+        sys.tables
+    WHERE
+        object_id = @Counter;
+
+    -- Gera o comando GRANT
+    SET @GrantStatement = 
+        'GRANT SELECT ON ' + QUOTENAME(@DatabaseName) + '.' + 
+        QUOTENAME(@SchemaName) + '.' + QUOTENAME(@TableName) + ' TO ' + QUOTENAME(@RoleName);
+
+    -- Executa o comando GRANT
+    EXEC sp_executesql @GrantStatement;
+
+    -- Incrementa o contador
+    SET @Counter = @Counter + 1;
+END;
+
