@@ -211,4 +211,32 @@ CREATE TABLE #Tabela1 (
 
 -- Restante do  script...
 
+----
+-- Validação de logins  e usuários
+DECLARE @UserName NVARCHAR(100) = 'USERNAME'; -- Substitua pelo nome do usuário
+DECLARE @LoginName NVARCHAR(100) = 'LOGINNAME'; -- Substitua pelo nome do login
+
+-- Verifica a existência do usuário
+IF EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @UserName)
+BEGIN
+    -- Dropa o usuário
+    EXEC('USE DBNAME; DROP USER ' + QUOTENAME(@UserName));
+    PRINT 'Usuário ' + @UserName + ' foi removido.';
+END
+ELSE
+BEGIN
+    PRINT 'Usuário ' + @UserName + ' não encontrado.';
+END;
+
+-- Verifica a existência do login
+IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = @LoginName AND type_desc = 'SQL_LOGIN')
+BEGIN
+    -- Dropa o login
+    EXEC('USE MASTER; DROP LOGIN ' + QUOTENAME(@LoginName));
+    PRINT 'Login ' + @LoginName + ' foi removido.';
+END
+ELSE
+BEGIN
+    PRINT 'Login ' + @LoginName + ' não encontrado.';
+END;
 
