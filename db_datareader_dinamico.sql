@@ -192,3 +192,23 @@ END;
 -- Limpa a tabela temporária
 DROP TABLE #TablesInfo;
 
+
+------
+validação de tabela temporária
+-- Verifica se a tabela temporária #Tabela1 existe
+IF OBJECT_ID('tempdb..#Tabela1') IS NOT NULL
+BEGIN
+    -- Se existir, dropa a tabela
+    DROP TABLE #Tabela1;
+END
+
+-- Cria a tabela temporária #Tabela1
+CREATE TABLE #Tabela1 (
+    -- Defina as colunas conforme necessário
+    ID INT,
+    Nome NVARCHAR(50)
+);
+
+-- Restante do  script...
+
+
