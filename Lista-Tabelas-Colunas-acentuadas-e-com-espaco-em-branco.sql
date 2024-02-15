@@ -1,6 +1,6 @@
--- script de exemplo para trazer as tabelas que cont�m colunas com acentua��o e espa�o nos nomes
--- traz tramb�m as tabelas, procedures e views com nomes que cont�m acento ou espa�os em branco.
-
+-- script de exemplo para trazer as tabelas que contém colunas com acentuação e espaço nos nomes
+-- traz trambém as tabelas, procedures e views com nomes que contém acento ou espaços em branco.
+-- '%[á-úÁ-ÚãõÃÕéÉíÍóÓôÔêÊûÜçÇ]%'
 use [meu banco];
 SELECT 
     COLUMN_NAME AS NomeObjeto,
@@ -26,7 +26,7 @@ ORDER BY tipo, Tabela, NomeObjeto
 -- views
 SELECT 
     TABLE_NAME AS NomeObjeto,
-    'Visualiza��o' AS Tipo
+    'Visualização' AS Tipo
 FROM INFORMATION_SCHEMA.VIEWS
 WHERE 
     TABLE_NAME COLLATE Latin1_General_BIN LIKE '%[^a-zA-Z0-9_]%'
