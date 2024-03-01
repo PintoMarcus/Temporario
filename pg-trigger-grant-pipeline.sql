@@ -1,3 +1,20 @@
+CREATE OR REPLACE FUNCTION grant_to_pipeline(role_name text)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER  -- Isso permite que a função seja executada com os privilégios do proprietário (pipeline)
+AS $$
+BEGIN
+    -- Concede a permissão à role pipeline
+    EXECUTE 'GRANT ' || role_name || ' TO pipeline';
+END;
+$$;
+
+-- Agora, sempre que você criar uma nova role, chame a função explicitamente
+-- Substitua 'novarole' pelo nome da role que você acabou de criar
+SELECT grant_to_pipeline('novarole');
+
+
+
 -- função para grant nas roles _dbo para o usuário pipeline
 CREATE OR REPLACE FUNCTION grant_to_pipeline()
 RETURNS event_trigger
