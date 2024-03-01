@@ -1,3 +1,24 @@
+CREATE OR REPLACE FUNCTION grant_to_pipeline(role_name TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    -- Concede a permissão à role pipeline apenas se o role_name não estiver na lista proibida
+    IF role_name NOT IN ('sysadmin', 'pg_kill', 'pg_ddladmin') THEN
+        EXECUTE 'GRANT ' || role_name || ' TO pipeline';
+    END IF;
+END;
+$$;
+
+-- Agora, sempre que você criar uma nova role, chame a função explicitamente
+-- Substitua 'novarole' pelo nome da role que você acabou de criar
+SELECT grant_to_pipeline('novarole');
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+
 CREATE OR REPLACE FUNCTION grant_to_pipeline(role_name text)
 RETURNS VOID
 LANGUAGE plpgsql
@@ -13,7 +34,8 @@ $$;
 -- Substitua 'novarole' pelo nome da role que você acabou de criar
 SELECT grant_to_pipeline('novarole');
 
----
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+--- para executra através do babelfish
 -- Substitua 'novarole' pelo nome real da role que você deseja conceder à role pipeline
 DECLARE @role_name NVARCHAR(255) = 'novarole';
 DECLARE @sql NVARCHAR(MAX);
@@ -24,7 +46,7 @@ SET @sql = 'SELECT grant_to_pipeline(' + QUOTENAME(@role_name, '''') + ')';
 -- Execute o comando usando sp_executesql
 EXEC sp_executesql @sql;
 
-
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 -- função para grant nas roles _dbo para o usuário pipeline
 CREATE OR REPLACE FUNCTION grant_to_pipeline()
 RETURNS event_trigger
@@ -53,7 +75,7 @@ EXECUTE FUNCTION grant_to_pipeline();
 
 
 
-/*+++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 -- função semelhante a anterior , mas que irá dar o grant se para qualquer role criada desde que exista com schema com mesmo nome
 CREATE OR REPLACE FUNCTION grant_to_pipeline()
 RETURNS event_trigger
@@ -79,7 +101,7 @@ $$;
 
 
 
-/*+++++++++++++++++++++++++++++++++++++++++++++*/
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 -- função semelhante a anterior , mas que irá dar o grant se para qualquer role criada desde que seja criado um schema com mesmo nome
 CREATE OR REPLACE FUNCTION grant_to_pipeline()
 RETURNS event_trigger
