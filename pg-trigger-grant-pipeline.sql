@@ -13,6 +13,16 @@ $$;
 -- Substitua 'novarole' pelo nome da role que você acabou de criar
 SELECT grant_to_pipeline('novarole');
 
+---
+-- Substitua 'novarole' pelo nome real da role que você deseja conceder à role pipeline
+DECLARE @role_name NVARCHAR(255) = 'novarole';
+DECLARE @sql NVARCHAR(MAX);
+
+-- Construa o comando SQL dinâmico
+SET @sql = 'SELECT grant_to_pipeline(' + QUOTENAME(@role_name, '''') + ')';
+
+-- Execute o comando usando sp_executesql
+EXEC sp_executesql @sql;
 
 
 -- função para grant nas roles _dbo para o usuário pipeline
