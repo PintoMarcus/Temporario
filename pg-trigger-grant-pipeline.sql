@@ -4,6 +4,28 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
+    -- Concede a permissão à role pipeline apenas se o role_name não estiver na lista proibida e começar com "db"
+    IF role_name NOT IN ('sysadmin', 'pg_kill', 'pg_ddladmin') AND role_name ~ '^db' THEN
+        EXECUTE 'GRANT ' || role_name || ' TO pipeline';
+    END IF;
+END;
+$$;
+
+-- Agora, sempre que você criar uma nova role, chame a função explicitamente
+-- Substitua 'novarole' pelo nome da role que você acabou de criar
+SELECT grant_to_pipeline('novarole');
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+
+
+CREATE OR REPLACE FUNCTION grant_to_pipeline(role_name TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
     -- Concede a permissão à role pipeline apenas se o role_name não estiver na lista proibida
     IF role_name NOT IN ('sysadmin', 'pg_kill', 'pg_ddladmin') THEN
         EXECUTE 'GRANT ' || role_name || ' TO pipeline';
