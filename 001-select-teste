@@ -20,3 +20,27 @@ Qual é mais performático depende do uso e dos requisitos da sua aplicação. O
 O TRANSACTION_REPEATABLE_READ, por outro lado, é mais estrito em termos de isolamento e pode ser necessário se você precisar de transações que garantam que os dados não mudem entre as leituras. Porém, isso pode causar bloqueios e afetar o desempenho em cenários com muitas atualizações concorrentes.
 
 A escolha entre eles depende das necessidades específicas da sua aplicação. Avalie as demandas de isolamento, o volume de leituras e gravações simultâneas e o espaço em disco disponível para determinar qual nível de isolamento é mais adequado ao seu caso.
+
+
+-- executar select se na coluna tiver algum caracter especial - mssql
+SELECT *
+FROM minhatabela
+WHERE colunax LIKE '%[^a-zA-Z0-9 ]%'
+/*
+Esta consulta retorna todos os registros em que a coluna colunax contém pelo menos um 
+caractere que não seja letra (maiúscula ou minúscula), número ou espaço. 
+Você pode ajustar a lista de caracteres permitidos conforme necessário para incluir 
+ou excluir outros caracteres especiais.
+*/
+
+-- executar select se na coluna tiver algum caracter especial - postgres
+SELECT *
+FROM minhatabela
+WHERE colunax ~ '[^\w\s]'
+
+
+/*
+Nesta consulta, a expressão regular [^\w\s] significa "qualquer caractere que não seja uma palavra
+(\w, que inclui letras, números e sublinhados) ou um espaço em branco (\s). 
+Portanto, esta consulta retornará todos os registros em que a coluna colunax contém pelo menos 
+um caractere que não seja uma letra, número, sublinhado ou espaço em branco. */
