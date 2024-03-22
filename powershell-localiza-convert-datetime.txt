@@ -1,0 +1,19 @@
+# Diretório onde os arquivos .sql estão localizados
+$diretorio = "C:\temp\"
+
+# Nome do arquivo de saída
+$arquivo_saida = "C:\temp\resultado.txt"
+
+# Lista todos os arquivos .sql no diretório e subdiretórios e procura por linhas contendo 'CONVERT' e 'DATETIME'
+Get-ChildItem -Path $diretorio -Recurse -Filter "*.sql" | ForEach-Object {
+    $nome_arquivo = $_.Name
+    $linhas = Get-Content $_.FullName | Where-Object { $_ -match '\bconvert\b.*\bdatetime\b' }
+
+    # Se houver linhas correspondentes, escreva o nome do arquivo e o número da linha no arquivo de saída
+    if ($linhas) {
+        $linhas | ForEach-Object {
+            $_ | Out-File -FilePath $arquivo_saida -Append
+            "$nome_arquivo - linha $($_.LineNumber)" | Out-File -FilePath $arquivo_saida -Append
+        }
+    }
+}
