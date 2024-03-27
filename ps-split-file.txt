@@ -1,0 +1,35 @@
+# Define o caminho do arquivo original e o diretório de saída para os arquivos divididos
+$arquivoOriginal = "Caminho\Para\Arquivo\Original.sql"
+$diretorioSaida = "Caminho\Para\Diretorio\Saida"
+
+# Contador de arquivos
+$i = 1
+
+# Inicializa o contador de linhas
+$contadorLinhas = 0
+
+# Inicializa o contador de arquivos
+$contadorArquivos = 1
+
+# Cria um novo arquivo de saída
+$novoArquivo = Join-Path -Path $diretorioSaida -ChildPath ("Arquivo_" + $contadorArquivos + ".sql")
+$streamWriter = New-Object System.IO.StreamWriter $novoArquivo
+
+# Abre o arquivo original
+Get-Content $arquivoOriginal | ForEach-Object {
+    # Escreve a linha no arquivo de saída atual
+    $streamWriter.WriteLine($_)
+    $contadorLinhas++
+
+    # Se atingir 50 mil linhas, fecha o arquivo atual e cria um novo arquivo de saída
+    if ($contadorLinhas -eq 50000) {
+        $streamWriter.Close()
+        $contadorLinhas = 0
+        $contadorArquivos++
+        $novoArquivo = Join-Path -Path $diretorioSaida -ChildPath ("Arquivo_" + $contadorArquivos + ".sql")
+        $streamWriter = New-Object System.IO.StreamWriter $novoArquivo
+    }
+}
+
+# Fecha o último arquivo de saída
+$streamWriter.Close()
