@@ -1,3 +1,21 @@
+SELECT rolname
+FROM pg_roles r
+WHERE rolname <> 'master-user'
+AND rolname LIKE 'db%' 
+AND rolname NOT LIKE '%_guest'
+AND rolname NOT LIKE '%_owner'        
+AND NOT EXISTS (
+    SELECT 1
+    FROM pg_auth_members am
+    JOIN pg_roles pr ON am.member = pr.oid
+    WHERE pr.rolname = 'pipelineuser'
+    AND am.roleid = r.oid
+);
+
+
+
+
+
 CREATE OR REPLACE FUNCTION check_and_execute_grant_pipeline()
 RETURNS VOID
 LANGUAGE plpgsql
