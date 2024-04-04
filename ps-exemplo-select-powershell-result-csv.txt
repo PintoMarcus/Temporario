@@ -1,0 +1,45 @@
+# Configurações de conexão com o banco de dados
+$ServerName = "localhost\DEV2019"
+$DatabaseName = "AdventureWorks2008R2"
+$Username = "marcus"
+
+# Solicitar senha em um prompt e armazená-la em uma variável segura
+$SecurePassword = Read-Host "Digite a senha" -AsSecureString
+$Password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword))
+
+# Caminho onde os arquivos CSV serão salvos
+$OutputDirectory = "C:\temp\word-csv\"
+
+# Lista de consultas a serem executadas e os nomes dos arquivos CSV resultantes
+$Queries = @(
+    @{ Query = "SET NOCOUNT ON;select top 0 
+    
+    
+    * from [HumanResources].[EmployeePayHistory] union all
+    select top 5 
+    
+    
+    * from [HumanResources].[EmployeePayHistory]"; FileName = "EmployeePayHistory.csv" },
+    @{ Query = "SET NOCOUNT ON;select top 5 * from [Person].[BusinessEntity]"; FileName = "BusinessEntity.csv" },
+    @{ Query = "SET NOCOUNT ON;select top 5 * from [Person].[StateProvince]"; FileName = "StateProvince.csv" },
+    @{ Query = "SET NOCOUNT ON;select top 5 * from [Production].[BillOfMaterials]"; FileName = "BillOfMaterials.csv" }
+)
+
+# Função para executar uma consulta e salvar o resultado em um arquivo CSV
+function ExecuteQueryAndSaveToCSV {
+    param (
+        [string]$Query,
+        [string]$FileName
+    )
+
+    # Construir o comando SQL
+    $SqlCmdCommand = "sqlcmd -S $ServerName -U $Username -P $Password -d $DatabaseName -s ';' -W -h -1 -Q `"$Query`" | Out-File `"$OutputDirectory\$FileName`" -Encoding UTF8"
+
+    # Executar o comando SQL
+    Invoke-Expression -Command $SqlCmdCommand
+}
+
+# Iterar sobre cada consulta e executá-la
+foreach ($QueryInfo in $Queries) {
+    ExecuteQueryAndSaveToCSV -Query $QueryInfo.Query -FileName $QueryInfo.FileName
+}
