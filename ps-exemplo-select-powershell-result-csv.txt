@@ -7,22 +7,17 @@ $Username = "marcus"
 $SecurePassword = Read-Host "Digite a senha" -AsSecureString
 $Password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword))
 
+#$Password = "senha123"
+
 # Caminho onde os arquivos CSV serão salvos
 $OutputDirectory = "C:\temp\word-csv\"
 
 # Lista de consultas a serem executadas e os nomes dos arquivos CSV resultantes
 $Queries = @(
-    @{ Query = "SET NOCOUNT ON;select top 0 
-    
-    
-    * from [HumanResources].[EmployeePayHistory] union all
-    select top 5 
-    
-    
-    * from [HumanResources].[EmployeePayHistory]"; FileName = "EmployeePayHistory.csv" },
-    @{ Query = "SET NOCOUNT ON;select top 5 * from [Person].[BusinessEntity]"; FileName = "BusinessEntity.csv" },
-    @{ Query = "SET NOCOUNT ON;select top 5 * from [Person].[StateProvince]"; FileName = "StateProvince.csv" },
-    @{ Query = "SET NOCOUNT ON;select top 5 * from [Production].[BillOfMaterials]"; FileName = "BillOfMaterials.csv" }
+    @{ Query = "SET NOCOUNT ON; select top 5 * from [HumanResources].[EmployeePayHistory]"; FileName = "EmployeePayHistory.csv" },
+    @{ Query = "SET NOCOUNT ON; select top 5 * from [Person].[BusinessEntity]"; FileName = "BusinessEntity.csv" },
+    @{ Query = "SET NOCOUNT ON; select top 5 * from [Person].[StateProvince]"; FileName = "StateProvince.csv" },
+    @{ Query = "SET NOCOUNT ON; select top 5 * from [Production].[BillOfMaterials]"; FileName = "BillOfMaterials.csv" }
 )
 
 # Função para executar uma consulta e salvar o resultado em um arquivo CSV
@@ -32,11 +27,33 @@ function ExecuteQueryAndSaveToCSV {
         [string]$FileName
     )
 
-    # Construir o comando SQL
-    $SqlCmdCommand = "sqlcmd -S $ServerName -U $Username -P $Password -d $DatabaseName -s ';' -W -h -1 -Q `"$Query`" | Out-File `"$OutputDirectory\$FileName`" -Encoding UTF8"
+    # Criar conexão com o banco de dados SQL Server
+    $ConnectionString = "Server=$ServerName;Database=$DatabaseName;User ID=$Username;Password=$Password;"
+    $Connection = New-Object System.Data.SqlClient.SqlConnection($ConnectionString)
+    
+    try {
+        # Abrir a conexão
+        $Connection.Open()
 
-    # Executar o comando SQL
-    Invoke-Expression -Command $SqlCmdCommand
+        # Criar um comando SQL
+        $Command = $Connection.CreateCommand()
+        $Command.CommandText = $Query
+
+        # Executar o comando e armazenar o resultado em um DataTable
+        $DataTable = New-Object System.Data.DataTable
+        $DataAdapter = New-Object System.Data.SqlClient.SqlDataAdapter($Command)
+        $DataAdapter.Fill($DataTable)
+
+        # Salvar o DataTable como um arquivo CSV
+        $DataTable | Export-Csv -Path "$OutputDirectory\$FileName" -Delimiter ";" -NoTypeInformation
+    }
+    catch {
+        Write-Host "Ocorreu um erro ao executar a consulta: $_.Exception.Message"
+    }
+    finally {
+        # Fechar a conexão
+        $Connection.Close()
+    }
 }
 
 # Iterar sobre cada consulta e executá-la
