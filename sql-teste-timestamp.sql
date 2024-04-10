@@ -38,3 +38,17 @@ SELECT
     CONVERT(DATETIME, [TIME]) AS [TIME]
 FROM 
     erros;
+
+
+SELECT 
+    C0,
+    TO_CHAR(TIME::timestamp, 'YYYY-MM-DD HH24:MI:SS') AS TIME
+FROM 
+    erros;
+
+
+SELECT 
+    C0,
+    TO_CHAR(TO_TIMESTAMP(TIME, 'YYYY-MM-DD HH24:MI:SS'), 'YYYY-MM-DD HH24:MI:SS') AS TIME
+FROM 
+    erros;
