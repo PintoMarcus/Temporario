@@ -1,5 +1,6 @@
--- Script percorre todas as tabelas e colunas
--- Criar uma tabela temporária para armazenar os resultados
+-- Script percorre todas as tabelas e colunas 
+-- podemos colocar as maiores tabelas em uma lista de exclusão "@TabelasParaIgnorar" para que o count seja mais rápido. 
+
 CREATE TABLE #Resultado (
     Schema_Tabela NVARCHAR(100),
     Nome_Tabela NVARCHAR(100),
@@ -12,10 +13,20 @@ DECLARE @Schema NVARCHAR(100);
 DECLARE @Coluna NVARCHAR(100);
 DECLARE @SQL NVARCHAR(MAX);
 
--- Cursor para percorrer todas as tabelas e colunas
+-- Tabelas a serem ignoradas
+DECLARE @TabelasParaIgnorar TABLE (
+    Nome_Tabela NVARCHAR(100)
+);
+
+-- Adicione as tabelas que você deseja ignorar nesta tabela temporária
+INSERT INTO @TabelasParaIgnorar (Nome_Tabela)
+VALUES ('tabela1'), ('tabela2');
+
+-- Cursor para percorrer todas as tabelas e colunas, excluindo as tabelas que queremos ignorar
 DECLARE cur CURSOR FOR
 SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME
 FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME NOT IN (SELECT Nome_Tabela FROM @TabelasParaIgnorar)
 ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION;
 
 OPEN cur;
@@ -44,7 +55,8 @@ DEALLOCATE cur;
 
 -- Retornar os resultados apenas das colunas que possuem valores nulos
 SELECT *
-FROM #Resultado where Count_Resultado > 0;
+FROM #Resultado WHERE Count_Resultado > 0;
+
 
 -- Retornar os resultados total
 /*
