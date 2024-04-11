@@ -24,10 +24,13 @@ VALUES ('tabela1'), ('tabela2');
 
 -- Cursor para percorrer todas as tabelas e colunas, excluindo as tabelas que queremos ignorar
 DECLARE cur CURSOR FOR
-SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME NOT IN (SELECT Nome_Tabela FROM @TabelasParaIgnorar)
-ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION;
+SELECT s.name AS TABLE_SCHEMA, t.name AS TABLE_NAME, c.name AS COLUMN_NAME
+FROM sys.tables t
+INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+INNER JOIN sys.columns c ON t.object_id = c.object_id
+WHERE t.type = 'U' -- Apenas tabelas (exclui views)
+AND t.name NOT IN (SELECT Nome_Tabela FROM @TabelasParaIgnorar)
+ORDER BY s.name, t.name, c.column_id;
 
 OPEN cur;
 
@@ -57,11 +60,6 @@ DEALLOCATE cur;
 SELECT *
 FROM #Resultado WHERE Count_Resultado > 0;
 
-
--- Retornar os resultados total
-/*
-SELECT *
-FROM #Resultado;
-*/
 -- Limpar a tabela temporária
 DROP TABLE #Resultado;
+
