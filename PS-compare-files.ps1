@@ -167,7 +167,10 @@ if (Test-Path $caminhoLista) {
                 $origemSemAspas = $conteudoOrigem[$i] -replace '"', ''
                 $destinoSemAspas = $conteudoDestino[$i] -replace '"', ''
                 if ($origemSemAspas -match '^\d+,\d+$' -and $destinoSemAspas -match '^\d+,\d+$') {
-                    if ($origemSemAspas -ne $destinoSemAspas) {
+                    # Remove zeros à direita dos números decimais
+                    $origemSemZeros = $origemSemAspas.TrimEnd('0')
+                    $destinoSemZeros = $destinoSemAspas.TrimEnd('0')
+                    if ($origemSemZeros -ne $destinoSemZeros) {
                         $iguaisComDecimal = $false
                         break
                     }
