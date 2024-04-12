@@ -100,9 +100,14 @@ if (Test-Path $caminhoLista) {
 
             # Verifica se os arquivos são iguais ou diferentes
             if ($iguais) {
-                $resultado = "$origem e $destino são IGUAIS"
+                # Verifica se os arquivos são 100% iguais ou têm diferença apenas devido a ajuste decimal
+                if ($conteudoOrigem -eq $conteudoDestino) {
+                    $resultado = "$origem e $destino são IGUAIS"
+                } else {
+                    $resultado = "$origem e $destino são IGUAIS com Decimal"
+                }
             } else {
-                $resultado = "$origem e $destino são IGUAIS com Decimal"
+                $resultado = "$origem e $destino são DIFERENTES"
             }
         }
 
