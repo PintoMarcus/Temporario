@@ -71,7 +71,7 @@ if (Test-Path $caminhoLista) {
         $conteudoOrigem = Get-Content $origem
         $conteudoDestino = Get-Content $destino
 
-        # Verificando se os arquivos têm o mesmo número de linhas
+        # Verifica se os arquivos têm o mesmo número de linhas
         if ($conteudoOrigem.Count -ne $conteudoDestino.Count) {
             $resultado = "$origem e $destino têm número diferente de linhas"
         } else {
@@ -79,35 +79,39 @@ if (Test-Path $caminhoLista) {
             $iguais = $true
             for ($i = 0; $i -lt $conteudoOrigem.Count; $i++) {
                 if ($conteudoOrigem[$i] -ne $conteudoDestino[$i]) {
-                    # Verifica se a diferença é apenas devido a valores numéricos com vírgula
-                    $origemSemAspas = $conteudoOrigem[$i] -replace '"', ''
-                    $destinoSemAspas = $conteudoDestino[$i] -replace '"', ''
-                    if ($origemSemAspas -match '^\d+,\d+$' -and $destinoSemAspas -match '^\d+,\d+$') {
-                        # Remove os zeros finais
-                        $origemSemZeros = $origemSemAspas.TrimEnd('0')
-                        $destinoSemZeros = $destinoSemAspas.TrimEnd('0')
-                        # Compara se os valores são iguais após remover os zeros finais
-                        if ($origemSemZeros -ne $destinoSemZeros) {
-                            $iguais = $false
-                            break
-                        }
-                    } else {
-                        $iguais = $false
-                        break
-                    }
+                    $iguais = $false
+                    break
                 }
             }
 
-            # Verifica se os arquivos são iguais ou diferentes
+            # Verifica se os arquivos são 100% iguais
             if ($iguais) {
-                # Verifica se os arquivos são 100% iguais ou têm diferença apenas devido a ajuste decimal
-                if ($conteudoOrigem -eq $conteudoDestino) {
-                    $resultado = "$origem e $destino são IGUAIS"
-                } else {
-                    $resultado = "$origem e $destino são IGUAIS com Decimal"
-                }
+                $resultado = "$origem e $destino são IGUAIS"
             } else {
-                $resultado = "$origem e $destino são DIFERENTES"
+                # Verifica se os arquivos têm diferença apenas nos decimais
+                $iguaisComDecimal = $true
+                for ($i = 0; $i -lt $conteudoOrigem.Count; $i++) {
+                    $origemSemAspas = $conteudoOrigem[$i] -replace '"', ''
+                    $destinoSemAspas = $conteudoDestino[$i] -replace '"', ''
+                    if ($origemSemAspas -match '^\d+,\d+$' -and $destinoSemAspas -match '^\d+,\d+$') {
+                        $origemSemZeros = $origemSemAspas.TrimEnd('0')
+                        $destinoSemZeros = $destinoSemAspas.TrimEnd('0')
+                        if ($origemSemZeros -ne $destinoSemZeros) {
+                            $iguaisComDecimal = $false
+                            break
+                        }
+                    } else {
+                        $iguaisComDecimal = $false
+                        break
+                    }
+                }
+
+                # Verifica se os arquivos são IGUAIS com Decimal ou DIFERENTES
+                if ($iguaisComDecimal) {
+                    $resultado = "$origem e $destino são IGUAIS com Decimal"
+                } else {
+                    $resultado = "$origem e $destino são DIFERENTES"
+                }
             }
         }
 
