@@ -100,9 +100,9 @@ if (Test-Path $caminhoLista) {
 
             # Verifica se os arquivos são iguais ou diferentes
             if ($iguais) {
-                $resultado = "$origem e $destino são IGUAIS com Decimal"
+                $resultado = "$origem e $destino são IGUAIS"
             } else {
-                $resultado = "$origem e $destino são DIFERENTES"
+                $resultado = "$origem e $destino são IGUAIS com Decimal"
             }
         }
 
@@ -117,4 +117,3 @@ if (Test-Path $caminhoLista) {
 } else {
     Write-Host "O arquivo $caminhoLista não foi encontrado."
 }
-
