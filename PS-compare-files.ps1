@@ -130,6 +130,7 @@ if (Test-Path $caminhoLista) {
 #usando file hash
 # Caminho do arquivo lista.txt
 # Caminho do arquivo lista.txt
+# Caminho do arquivo lista.txt
 $caminhoLista = "C:\temp\compare-origem\lista.txt"
 
 # Caminho do arquivo de resultado
@@ -169,8 +170,8 @@ if (Test-Path $caminhoLista) {
                 $destinoSemAspas = $conteudoDestino[$i] -replace '"', ''
                 if ($origemSemAspas -match '^\d+,\d+$' -and $destinoSemAspas -match '^\d+,\d+$') {
                     # Remover zeros à direita dos números decimais
-                    $origemSemZeros = $origemSemAspas.TrimEnd('0')
-                    $destinoSemZeros = $destinoSemAspas.TrimEnd('0')
+                    $origemSemZeros = $origemSemAspas -replace '0+$', ''
+                    $destinoSemZeros = $destinoSemAspas -replace '0+$', ''
                     # Remover vírgulas no final da string
                     $origemSemZeros = $origemSemZeros.TrimEnd(',')
                     $destinoSemZeros = $destinoSemZeros.TrimEnd(',')
@@ -203,4 +204,3 @@ if (Test-Path $caminhoLista) {
 } else {
     Write-Host "O arquivo $caminhoLista não foi encontrado."
 }
-
