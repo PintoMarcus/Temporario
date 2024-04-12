@@ -94,19 +94,23 @@ if (Test-Path $caminhoLista) {
 
 -----
 
-SELECT 
-    *,
+DECLARE @TableName NVARCHAR(MAX) = 'carros';
+DECLARE @Query NVARCHAR(MAX) = '';
+
+SELECT @Query = @Query + 
     CASE 
-        WHEN COLUMNPROPERTY(object_id(TABLE_SCHEMA + '.' + TABLE_NAME), COLUMN_NAME, 'IsComputed') = 0
-            AND DATA_TYPE = 'decimal' 
-        THEN 
-            CASE 
-                WHEN valor = ROUND(valor, 0) THEN FORMAT(valor, '0')
-                ELSE FORMAT(valor, '0.##########') -- Ajuste o número de casas decimais conforme necessário
-            END
-        ELSE valor
-    END AS valor_formatado
-FROM 
-    INFORMATION_SCHEMA.COLUMNS
-WHERE 
-    TABLE_NAME = 'carros'
+        WHEN c.DATA_TYPE = 'decimal' THEN
+            'CASE ' +
+            'WHEN ' + QUOTENAME(c.COLUMN_NAME) + ' = ROUND(' + QUOTENAME(c.COLUMN_NAME) + ', 0) THEN FORMAT(' + QUOTENAME(c.COLUMN_NAME) + ', ''0'') ' +
+            'ELSE FORMAT(' + QUOTENAME(c.COLUMN_NAME) + ', ''0.##########'') ' +
+            'END AS ' + QUOTENAME(c.COLUMN_NAME) + ', '
+        ELSE
+            QUOTENAME(c.COLUMN_NAME) + ', '
+    END
+FROM INFORMATION_SCHEMA.COLUMNS c
+INNER JOIN sys.types t ON c.DATA_TYPE = t.name
+WHERE c.TABLE_NAME = @TableName;
+
+SET @Query = 'SELECT ' + LEFT(@Query, LEN(@Query) - 1) + ' FROM ' + @TableName;
+
+EXEC sp_executesql @Query;
