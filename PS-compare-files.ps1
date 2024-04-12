@@ -94,10 +94,11 @@ if (Test-Path $caminhoLista) {
 
 -----
 
-DECLARE @TableName NVARCHAR(MAX) = 'carros';
+DECLARE @TableName NVARCHAR(MAX) = 'AWBuildVersion';
 DECLARE @Query NVARCHAR(MAX) = '';
+DECLARE @Columns NVARCHAR(MAX) = '';
 
-SELECT @Query = @Query + 
+SELECT @Columns = @Columns + 
     CASE 
         WHEN c.DATA_TYPE = 'decimal' THEN
             'CASE ' +
@@ -111,6 +112,8 @@ FROM INFORMATION_SCHEMA.COLUMNS c
 INNER JOIN sys.types t ON c.DATA_TYPE = t.name
 WHERE c.TABLE_NAME = @TableName;
 
-SET @Query = 'SELECT ' + LEFT(@Query, LEN(@Query) - 1) + ' FROM ' + @TableName;
+SET @Columns = LEFT(@Columns, LEN(@Columns) - 1);
+
+SET @Query = 'SELECT ' + @Columns + ' FROM ' + @TableName;
 
 EXEC sp_executesql @Query;
