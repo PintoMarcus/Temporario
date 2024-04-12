@@ -157,7 +157,32 @@ if (Test-Path $caminhoLista) {
         if ($hashOrigem -eq $hashDestino) {
             $resultado = "$origem e $destino são IGUAIS"
         } else {
-            $resultado = "$origem e $destino são DIFERENTES"
+            # Ler o conteúdo dos arquivos
+            $conteudoOrigem = Get-Content $origem
+            $conteudoDestino = Get-Content $destino
+
+            # Verificar se a diferença está apenas nos campos decimais
+            $iguaisComDecimal = $true
+            for ($i = 0; $i -lt $conteudoOrigem.Count; $i++) {
+                $origemSemAspas = $conteudoOrigem[$i] -replace '"', ''
+                $destinoSemAspas = $conteudoDestino[$i] -replace '"', ''
+                if ($origemSemAspas -match '^\d+,\d+$' -and $destinoSemAspas -match '^\d+,\d+$') {
+                    if ($origemSemAspas -ne $destinoSemAspas) {
+                        $iguaisComDecimal = $false
+                        break
+                    }
+                } else {
+                    $iguaisComDecimal = $false
+                    break
+                }
+            }
+
+            # Se a diferença estiver apenas nos campos decimais
+            if ($iguaisComDecimal) {
+                $resultado = "$origem e $destino são IGUAIS com DECIMAL"
+            } else {
+                $resultado = "$origem e $destino são DIFERENTES"
+            }
         }
 
         # Adicionando o resultado ao array
