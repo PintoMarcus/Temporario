@@ -94,9 +94,7 @@ if (Test-Path $caminhoLista) {
                     $origemSemAspas = $conteudoOrigem[$i] -replace '"', ''
                     $destinoSemAspas = $conteudoDestino[$i] -replace '"', ''
                     if ($origemSemAspas -match '^\d+,\d+$' -and $destinoSemAspas -match '^\d+,\d+$') {
-                        $origemSemZeros = $origemSemAspas.TrimEnd('0')
-                        $destinoSemZeros = $destinoSemAspas.TrimEnd('0')
-                        if ($origemSemZeros -ne $destinoSemZeros) {
+                        if ($origemSemAspas -ne $destinoSemAspas) {
                             $iguaisComDecimal = $false
                             break
                         }
