@@ -91,29 +91,36 @@ if (Test-Path $caminhoLista) {
     Write-Host "O arquivo $caminhoLista não foi encontrado."
 }
 
+###############################################
+REMOVE ZEROS e VÍRGULAS
+# Caminho do arquivo lista.txt
+$caminhoLista = "C:\temp\compare-origem\lista2.txt"
 
------
+# Verifica se o arquivo de lista existe
+if (Test-Path $caminhoLista) {
+    # Lê o conteúdo do arquivo lista.txt
+    $arquivos = Get-Content $caminhoLista
 
-DECLARE @TableName NVARCHAR(MAX) = 'AWBuildVersion';
-DECLARE @Query NVARCHAR(MAX) = '';
-DECLARE @Columns NVARCHAR(MAX) = '';
+    # Loop através de cada arquivo na lista
+    foreach ($arquivo in $arquivos) {
+        # Verifica se o arquivo existe
+        if (Test-Path $arquivo) {
+            # Lê o conteúdo do arquivo
+            $conteudo = Get-Content $arquivo
 
-SELECT @Columns = @Columns + 
-    CASE 
-        WHEN c.DATA_TYPE = 'decimal' THEN
-            'CASE ' +
-            'WHEN ' + QUOTENAME(c.COLUMN_NAME) + ' = ROUND(' + QUOTENAME(c.COLUMN_NAME) + ', 0) THEN FORMAT(' + QUOTENAME(c.COLUMN_NAME) + ', ''0'') ' +
-            'ELSE FORMAT(' + QUOTENAME(c.COLUMN_NAME) + ', ''0.##########'') ' +
-            'END AS ' + QUOTENAME(c.COLUMN_NAME) + ', '
-        ELSE
-            QUOTENAME(c.COLUMN_NAME) + ', '
-    END
-FROM INFORMATION_SCHEMA.COLUMNS c
-INNER JOIN sys.types t ON c.DATA_TYPE = t.name
-WHERE c.TABLE_NAME = @TableName;
+            # Remove todos os caracteres "0" e ","
+            $conteudoSemZerosVirgulas = $conteudo -replace '[0,]', ''
 
-SET @Columns = LEFT(@Columns, LEN(@Columns) - 1);
+            # Sobrescreve o arquivo com o conteúdo modificado
+            $conteudoSemZerosVirgulas | Set-Content $arquivo -Force
 
-SET @Query = 'SELECT ' + @Columns + ' FROM ' + @TableName;
+            Write-Host "Zeros e vírgulas removidos do arquivo: $arquivo"
+        } else {
+            Write-Host "O arquivo $arquivo não foi encontrado."
+        }
+    }
+} else {
+    Write-Host "O arquivo $caminhoLista não foi encontrado."
+}
 
-EXEC sp_executesql @Query;
+###################################
