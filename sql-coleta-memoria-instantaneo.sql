@@ -37,3 +37,12 @@ union
 select	'Todos',SUM (nSizeInMemoryMB)			
 from cteSizeDB								
 order by	2			desc;	
+
+
+
+---- COLETA DE INFORMAÇÃO MAX MEMORY DA INSTÂNCIA
+-- Consulta para obter o nome da instância e o valor máximo de memória configurado em GB
+SELECT @@SERVERNAME AS InstanceName,
+       CAST((CAST(value_in_use AS FLOAT) / 1024) AS DECIMAL(10, 2)) AS MaxMemoryGB
+FROM sys.configurations
+WHERE name = 'max server memory (MB)';
