@@ -39,9 +39,14 @@ BEGIN
     -- Criar o comando SQL para criar o login
     DECLARE @SQL NVARCHAR(MAX);
     SET @SQL = 'CREATE LOGIN ' + QUOTENAME(@Usuario) + ' WITH PASSWORD = ' + QUOTENAME(@Senha, '''');
-
-    -- Executar o comando SQL
+    -- Executar o comando SQL para criar o login
     EXEC sp_executesql @SQL;
+
+    -- Criar o comando SQL para conceder sysadmin ao login
+    DECLARE @SQL2 NVARCHAR(MAX);
+    SET @SQL2 = 'ALTER SERVER ROLE sysadmin ADD MEMBER ' + QUOTENAME(@Usuario) ;
+    -- Executar o comando SQL para criar o login
+    EXEC sp_executesql @SQL2;
 
     -- Obter o próximo usuário
     FETCH NEXT FROM UsuariosCursor INTO @Usuario;
