@@ -1,7 +1,7 @@
 -- Lista os usuários de uma role específica
 -- no exemplo usamos a role sysadmin
 
-SELECT rolname
+SELECT usename
 FROM pg_user
 WHERE usesysid IN (
     SELECT member
