@@ -146,6 +146,47 @@ FROM #tbteste;
 SELECT CHARINDEX('app', name) AS posicao_old
 FROM #tbteste;
 
+
+
+
+
+SELECT id, name, NEWID() AS unique_identifier
+FROM #tbteste;
+
+SELECT id, name, RAND(CHECKSUM(NEWID())) AS random_number
+FROM #tbteste;
+
+
+SELECT id, name, GETDATE() AS current_datetime
+FROM #tbteste;
+
+
+SELECT id, name, GETUTCDATE() AS current_utc_datetime
+FROM #tbteste;
+
+
+SELECT id, name, SUSER_SNAME() AS security_user
+FROM #tbteste;
+
+
+SELECT id, name, HOST_NAME() AS host_name
+FROM #tbteste;
+
+
+SELECT id, name, SYSDATETIME() AS current_sysdatetime
+FROM #tbteste;
+
+
+SELECT id, name, SYSUTCDATETIME() AS current_sysutcdatetime
+FROM #tbteste;
+
+SELECT id, name, DB_NAME() AS current_database
+FROM #tbteste;
+
+
+
+
+
 drop table #tbteste;
 
 --------------------------------------------------------
