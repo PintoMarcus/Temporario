@@ -1,3 +1,17 @@
+SELECT 
+    tablename AS table_name,
+    rolname AS owner
+FROM 
+    pg_tables
+JOIN 
+    pg_roles
+ON 
+    pg_tables.tableowner = pg_roles.rolname
+WHERE 
+    schemaname = 'test_dbo';
+
+
+
 SELECT table_schema || '.' || table_name AS table_name
 FROM information_schema.tables
 WHERE table_type = 'BASE TABLE'
