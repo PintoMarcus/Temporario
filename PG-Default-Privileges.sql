@@ -74,3 +74,62 @@ BEGIN
     END LOOP;
 END $$;
 /*************** TYPES FIM ****************************/
+
+
+
+
+/******************** FUNÇÃO PARA AUTOMATIZAR ************************/
+CREATE OR REPLACE FUNCTION grant_dba_permissions(
+    target_schema TEXT,
+    target_role TEXT,
+    target_user TEXT
+)
+RETURNS VOID AS $$
+BEGIN
+    -- Grant all privileges on the schema
+    EXECUTE format('GRANT ALL ON SCHEMA %I TO %I WITH GRANT OPTION;', target_schema, target_user);
+
+    -- Alter default privileges for tables
+    EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA %I GRANT REFERENCES, TRIGGER ON TABLES TO %I WITH GRANT OPTION;', target_role, target_schema, target_user);
+
+    -- Alter default privileges for sequences
+    EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA %I GRANT SELECT, USAGE ON SEQUENCES TO %I WITH GRANT OPTION;', target_role, target_schema, target_user);
+
+    -- Alter default privileges for functions
+    EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA %I GRANT EXECUTE ON FUNCTIONS TO %I WITH GRANT OPTION;', target_role, target_schema, target_user);
+
+    -- Alter default privileges for types
+    EXECUTE format('ALTER DEFAULT PRIVILEGES FOR ROLE %I IN SCHEMA %I GRANT USAGE ON TYPES TO %I WITH GRANT OPTION;', target_role, target_schema, target_user);
+
+    -- Grant specific privileges on all current tables
+    EXECUTE format('GRANT REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA %I TO %I WITH GRANT OPTION;', target_schema, target_user);
+
+    -- Grant specific privileges on all current sequences
+    EXECUTE format('GRANT SELECT, USAGE ON ALL SEQUENCES IN SCHEMA %I TO %I WITH GRANT OPTION;', target_schema, target_user);
+
+    -- Grant specific privileges on all current functions
+    EXECUTE format('GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA %I TO %I WITH GRANT OPTION;', target_schema, target_user);
+
+    -- Grant usage on all types in the schema
+    PERFORM
+    (
+        SELECT typname, nspname
+        FROM pg_type
+        JOIN pg_namespace ON pg_type.typnamespace = pg_namespace.oid
+        WHERE nspname = target_schema
+    );
+
+    FOR rec IN 
+        SELECT typname, nspname
+        FROM pg_type
+        JOIN pg_namespace ON pg_type.typnamespace = pg_namespace.oid
+        WHERE nspname = target_schema
+    LOOP
+        EXECUTE format('GRANT USAGE ON TYPE %I.%I TO %I;', rec.nspname, rec.typname, target_user);
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+/********************************************************************************************/
+-- CHAMADA DA FUNÇÂO
+SELECT grant_dba_permissions('nome-schema', 'nome-role_dbo', 'role-dba-access');
