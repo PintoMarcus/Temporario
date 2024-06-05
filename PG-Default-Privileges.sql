@@ -79,12 +79,14 @@ END $$;
 
 
 /******************** FUNÇÃO PARA AUTOMATIZAR ************************/
-CREATE OR REPLACE FUNCTION grant_dba_permissions(
+CREATE OR REPLACE FUNCTION grant_permissions(
     target_schema TEXT,
     target_role TEXT,
     target_user TEXT
 )
 RETURNS VOID AS $$
+DECLARE
+    rec RECORD;
 BEGIN
     -- Grant all privileges on the schema
     EXECUTE format('GRANT ALL ON SCHEMA %I TO %I WITH GRANT OPTION;', target_schema, target_user);
@@ -111,24 +113,17 @@ BEGIN
     EXECUTE format('GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA %I TO %I WITH GRANT OPTION;', target_schema, target_user);
 
     -- Grant usage on all types in the schema
-    PERFORM
-    (
-        SELECT typname, nspname
-        FROM pg_type
-        JOIN pg_namespace ON pg_type.typnamespace = pg_namespace.oid
-        WHERE nspname = target_schema
-    );
-
     FOR rec IN 
-        SELECT typname, nspname
-        FROM pg_type
-        JOIN pg_namespace ON pg_type.typnamespace = pg_namespace.oid
+        SELECT typname, nspname 
+        FROM pg_type 
+        JOIN pg_namespace ON pg_type.typnamespace = pg_namespace.oid 
         WHERE nspname = target_schema
     LOOP
         EXECUTE format('GRANT USAGE ON TYPE %I.%I TO %I;', rec.nspname, rec.typname, target_user);
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
 
 /********************************************************************************************/
 -- CHAMADA DA FUNÇÂO
