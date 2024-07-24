@@ -46,3 +46,16 @@ SELECT @@SERVERNAME AS InstanceName,
        CAST((CAST(value_in_use AS FLOAT) / 1024) AS DECIMAL(10, 2)) AS MaxMemoryGB
 FROM sys.configurations
 WHERE name = 'max server memory (MB)';
+
+
+--- Coleta memória do servidor e memória da instância
+
+SELECT 
+    CEILING(physical_memory_kb / 1024.0 / 1024.0) AS server_hardware_memory_gb,
+    CONVERT(INT, value_in_use) / 1024 AS instance_max_memory_configured_gb
+FROM 
+    sys.dm_os_sys_info
+CROSS JOIN
+    (SELECT value_in_use 
+     FROM sys.configurations 
+     WHERE name = 'max server memory (MB)') AS config;
