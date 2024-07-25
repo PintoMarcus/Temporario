@@ -101,3 +101,84 @@ ORDER BY
         WHEN TimeGroup = '12:00:00-17:59:59' THEN 3
         WHEN TimeGroup = '18:00:00-23:59:59' THEN 4
     END;
+
+
+
+/********************************** IO DISCO ***************************************/
+
+WITH FilteredData AS (
+    SELECT
+        dbname,
+        dbfile,
+        num_of_writes,
+        MB_written,
+        num_of_reads,
+        MB_read,
+        latency_read_ms,
+        latency_write_ms,
+        DtColeta,
+        CASE
+            WHEN DATEPART(HOUR, DtColeta) BETWEEN 0 AND 5 THEN '00:00:00-05:59:59'
+            WHEN DATEPART(HOUR, DtColeta) BETWEEN 6 AND 11 THEN '06:00:00-11:59:59'
+            WHEN DATEPART(HOUR, DtColeta) BETWEEN 12 AND 17 THEN '12:00:00-17:59:59'
+            WHEN DATEPART(HOUR, DtColeta) BETWEEN 18 AND 23 THEN '18:00:00-23:59:59'
+        END AS TimeGroup
+    FROM
+        [shc].[_sql_disk]
+    WHERE
+        DBNAME IN ('tempdb')
+        AND (num_of_writes >= 0 OR num_of_reads >= 0)
+        AND DtColeta >= DATEADD(DAY, -10, GETDATE())
+),
+AggregatedData AS (
+    SELECT
+        dbname,
+        TimeGroup,
+        CASE
+            WHEN dbfile LIKE '%.mdf' OR dbfile LIKE '%.ndf' THEN 'Datafile'
+            WHEN dbfile LIKE '%.ldf' THEN 'LogFile'
+            ELSE dbfile
+        END AS TipoArquivo,
+        MAX(num_of_writes) AS max_writes,
+        MAX(MB_written) AS max_mb_written,
+        MAX(num_of_reads) AS max_reads,
+        MAX(MB_read) AS max_mb_read,
+        MAX(latency_read_ms) AS max_latency_read_ms,
+        MAX(latency_write_ms) AS max_latency_write_ms,
+        AVG(num_of_writes) AS avg_writes,
+        AVG(MB_written) AS avg_mb_written,
+        AVG(num_of_reads) AS avg_reads,
+        AVG(MB_read) AS avg_mb_read,
+        AVG(latency_read_ms) AS avg_latency_read_ms,
+        AVG(latency_write_ms) AS avg_latency_write_ms
+    FROM
+        FilteredData
+    GROUP BY
+        dbname, dbfile, TimeGroup
+)
+SELECT
+    dbname,
+    TipoArquivo,
+    TimeGroup,
+    max_writes,
+    max_mb_written,
+    max_reads,
+    max_mb_read,
+    max_latency_read_ms,
+    max_latency_write_ms,
+    avg_writes,
+    avg_mb_written,
+    avg_reads,
+    avg_mb_read,
+    avg_latency_read_ms,
+    avg_latency_write_ms
+FROM
+    AggregatedData
+ORDER BY
+    dbname,
+    CASE 
+        WHEN TimeGroup = '00:00:00-05:59:59' THEN 1
+        WHEN TimeGroup = '06:00:00-11:59:59' THEN 2
+        WHEN TimeGroup = '12:00:00-17:59:59' THEN 3
+        WHEN TimeGroup = '18:00:00-23:59:59' THEN 4
+    END;
