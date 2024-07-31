@@ -24,7 +24,18 @@ WHERE
     t.type = 'U'
     AND t.is_ms_shipped = 0
 
--- Parte 2: Gerar comandos GRANT para todas as funções e procedures
+-- Parte 2: Gerar comandos GRANT SELECT para todas as VIEWS
+INSERT INTO #GrantCommands (Command)
+SELECT 
+    'GRANT SELECT, INSERT, UPDATE, DELETE ON [' + s.name + '].[' + v.name + '] TO [' + @RoleName + '];'
+FROM
+    sys.views v
+    INNER JOIN sys.schemas s ON v.schema_id = s.schema_id
+WHERE
+    v.type = 'U'
+    AND v.is_ms_shipped = 0
+    
+-- Parte 3: Gerar comandos GRANT para todas as funções e procedures
 INSERT INTO #GrantCommands (Command)
 SELECT 
     'GRANT EXECUTE ON [' + s.name + '].[' + p.name + '] TO [' + @RoleName + '];'
