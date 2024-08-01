@@ -182,3 +182,31 @@ ORDER BY
         WHEN TimeGroup = '12:00:00-17:59:59' THEN 3
         WHEN TimeGroup = '18:00:00-23:59:59' THEN 4
     END;
+
+
+
+
+/**************************************************************************************/
+
+Falta desenvolver esse cara.
+Ele é para pegar a média de cpu por dia por hora
+
+
+-- Passo 1: Calcular a média de uso de CPU para cada dia dentro do intervalo de 18:00:00 a 18:59:59
+WITH DailyAverage AS (
+    SELECT
+        CAST(datacoleta AS DATE) AS Date, -- Extrai a data sem a hora
+        AVG(usocpu) AS AvgCPU
+    FROM
+        sua_tabela
+    WHERE
+        DATEPART(HOUR, datacoleta) = 18
+    GROUP BY
+        CAST(datacoleta AS DATE)
+)
+
+-- Passo 2: Encontrar o maior valor dessas médias diárias
+SELECT
+    MAX(AvgCPU) AS MaxDailyAvgCPU
+FROM
+    DailyAverage;
