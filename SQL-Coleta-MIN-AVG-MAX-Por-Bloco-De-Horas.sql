@@ -203,10 +203,24 @@ WITH DailyAverage AS (
         DATEPART(HOUR, datacoleta) = 18
     GROUP BY
         CAST(datacoleta AS DATE)
-)
+),
 
 -- Passo 2: Encontrar o maior valor dessas médias diárias
+MaxDailyAvg AS (
+    SELECT
+        MAX(AvgCPU) AS MaxAvgCPU
+    FROM
+        DailyAverage
+)
+
+-- Passo 3: Retornar o dia correspondente a essa média máxima
 SELECT
-    MAX(AvgCPU) AS MaxDailyAvgCPU
+    d.Date,
+    d.AvgCPU AS MaxDailyAvgCPU
 FROM
-    DailyAverage;
+    DailyAverage d
+INNER JOIN
+    MaxDailyAvg m
+ON
+    d.AvgCPU = m.MaxAvgCPU;
+
