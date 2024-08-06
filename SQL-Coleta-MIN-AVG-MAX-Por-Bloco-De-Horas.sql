@@ -224,3 +224,87 @@ INNER JOIN
 ON
     d.AvgCPU = m.MaxAvgCPU;
 
+
+
+
+/*****************************************************************************************************/
+
+-- verificar máxima média de determinada hora
+WITH FilteredData AS (
+    SELECT
+        a.runtime as DtColeta,
+        a.cooked_value
+    FROM
+        MINHATABELA a
+    WHERE
+        a.instance_name = '_total'
+),
+GroupedData AS (
+    SELECT
+        DATEADD(HOUR, DATEPART(HOUR, DtColeta), CAST(CAST(DtColeta AS DATE) AS DATETIME)) AS HourBlock,
+        DATEPART(HOUR, DtColeta) AS HourOfDay,
+        CAST(DtColeta AS DATE) AS Date,
+        a.cooked_value AS CpuPercent
+    FROM
+        FilteredData a
+),
+HourlyAverages AS (
+    SELECT
+        Date,
+        HourOfDay,
+        AVG(CpuPercent) AS AVGCpuPercent,
+        MAX(CpuPercent) AS MAXCpuPercent
+    FROM
+        GroupedData
+    GROUP BY
+        Date,
+        HourOfDay
+),
+MaxDailyAverages AS (
+    SELECT
+        HourOfDay,
+        MAX(AVGCpuPercent) AS MaxAvgCpuPercent
+    FROM
+        HourlyAverages
+    GROUP BY
+        HourOfDay
+)
+SELECT
+    HourlyAverages.Date,
+    CASE HourlyAverages.HourOfDay
+        WHEN 0 THEN '00-horas'
+        WHEN 1 THEN '01-horas'
+        WHEN 2 THEN '02-horas'
+        WHEN 3 THEN '03-horas'
+        WHEN 4 THEN '04-horas'
+        WHEN 5 THEN '05-horas'
+        WHEN 6 THEN '06-horas'
+        WHEN 7 THEN '07-horas'
+        WHEN 8 THEN '08-horas'
+        WHEN 9 THEN '09-horas'
+        WHEN 10 THEN '10-horas'
+        WHEN 11 THEN '11-horas'
+        WHEN 12 THEN '12-horas'
+        WHEN 13 THEN '13-horas'
+        WHEN 14 THEN '14-horas'
+        WHEN 15 THEN '15-horas'
+        WHEN 16 THEN '16-horas'
+        WHEN 17 THEN '17-horas'
+        WHEN 18 THEN '18-horas'
+        WHEN 19 THEN '19-horas'
+        WHEN 20 THEN '20-horas'
+        WHEN 21 THEN '21-horas'
+        WHEN 22 THEN '22-horas'
+        WHEN 23 THEN '23-horas'
+    END AS TimeGroup,
+    HourlyAverages.AVGCpuPercent AS AVGCpuPercent,
+    HourlyAverages.MAXCpuPercent AS MAXCpuPercent
+FROM
+    HourlyAverages
+    INNER JOIN MaxDailyAverages
+    ON HourlyAverages.HourOfDay = MaxDailyAverages.HourOfDay
+    AND HourlyAverages.AVGCpuPercent = MaxDailyAverages.MaxAvgCpuPercent
+ORDER BY
+    HourlyAverages.HourOfDay;
+/*********************************************************************************************************/
+
