@@ -306,5 +306,16 @@ FROM
     AND HourlyAverages.AVGCpuPercent = MaxDailyAverages.MaxAvgCpuPercent
 ORDER BY
     HourlyAverages.HourOfDay;
+
+
+/*
+Explicação do Script:
+FilteredData: Seleciona os dados brutos filtrados pela condição de instância.
+GroupedData: Agrupa os dados por blocos de horas, adicionando também a coluna Date para representar o dia.
+HourlyAverages: Calcula a média (AVG) e o máximo (MAX) de uso de CPU (CpuPercent) para cada hora de cada dia.
+MaxDailyAverages: Calcula a maior média diária de uso de CPU para cada hora do dia.
+Seleção Final: Junta as tabelas HourlyAverages e MaxDailyAverages para obter a data e a hora com a maior média diária de uso de CPU, ordenando o resultado por hora do dia.
+Essa consulta ajustada trará o dia específico e a faixa horária com a maior média de uso de CPU, conforme solicitado.
+*/
 /*********************************************************************************************************/
 
