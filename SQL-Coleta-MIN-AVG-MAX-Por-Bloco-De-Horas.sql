@@ -322,7 +322,7 @@ Essa consulta ajustada trará o dia específico e a faixa horária com a maior m
 
 
 /****************************************************************/
-
+-- MAX e AVG por banco de dados agrupados por hora (independente do dia).
 select 
     b.dbname,
     DATEPART(HOUR, A.runtime) as HourOfDay,
@@ -345,3 +345,30 @@ order by
     b.dbname,
     DATEPART(HOUR, A.runtime);
 
+/**************************************************************************/
+
+-- MAX e AVG por banco de dados agrupados por dia e hora 
+select 
+    b.dbname,
+    CONVERT(DATE, A.runtime) as Date,
+    DATEPART(HOUR, A.runtime) as HourOfDay,
+    AVG((a.cooked_value/@total_cores_server) * (b.cpupercent / 100)) as AVGCpupercent,
+    MAX((a.cooked_value/@total_cores_server) * (b.cpupercent / 100)) as MAXCpupercent,
+    AVG((a.cooked_value * (b.cpupercent / 100))/100) as AVGTcores,
+    MAX((a.cooked_value * (b.cpupercent / 100))/100) as MAXTcores
+from
+    [sch].[_perfmon] AS A
+INNER JOIN
+    [sch].[_sql_cpu] AS B
+    ON DATEADD(MINUTE, DATEDIFF(MINUTE, 0, A.runtime), 0) = DATEADD(MINUTE, DATEDIFF(MINUTE, 0, B.dtcoleta), 0)
+where
+    b.dbname in ('DBA', 'DBB')
+    and a.instance = 'sqlservr'
+group by
+    b.dbname,
+    CONVERT(DATE, A.runtime),
+    DATEPART(HOUR, A.runtime)
+order by
+    b.dbname,
+    CONVERT(DATE, A.runtime),
+    DATEPART(HOUR, A.runtime);
