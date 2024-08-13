@@ -372,3 +372,37 @@ order by
     b.dbname,
     CONVERT(DATE, A.runtime),
     DATEPART(HOUR, A.runtime);
+
+
+
+
+/***************************************************************************/
+
+
+-- MAX e AVG por banco de dados agrupados por dia e hora - Apenas dias da semana DATEPART(WEEKDAY, A.runtime) BETWEEN 2 AND 6  -- Considera apenas os dias úteis (segunda a sexta) 1 é domingo e 7 é sabado.
+SELECT 
+    b.dbname,
+    CONVERT(DATE, A.runtime) as Date,
+    DATEPART(HOUR, A.runtime) as HourOfDay,
+    AVG((a.cooked_value/@total_cores_server) * (b.cpupercent / 100)) as AVGCpupercent,
+    MAX((a.cooked_value/@total_cores_server) * (b.cpupercent / 100)) as MAXCpupercent,
+    AVG((a.cooked_value * (b.cpupercent / 100))/100) as AVGTcores,
+    MAX((a.cooked_value * (b.cpupercent / 100))/100) as MAXTcores
+FROM
+    [sch].[_perfmon] AS A
+INNER JOIN
+    [sch].[_sql_cpu] AS B
+    ON DATEADD(MINUTE, DATEDIFF(MINUTE, 0, A.runtime), 0) = DATEADD(MINUTE, DATEDIFF(MINUTE, 0, B.dtcoleta), 0)
+WHERE
+    b.dbname IN ('DBA', 'DBB')
+    AND a.instance = 'sqlservr'
+    AND DATEPART(WEEKDAY, A.runtime) BETWEEN 2 AND 6  -- Considera apenas os dias úteis (segunda a sexta)
+GROUP BY
+    b.dbname,
+    CONVERT(DATE, A.runtime),
+    DATEPART(HOUR, A.runtime)
+ORDER BY
+    b.dbname,
+    CONVERT(DATE, A.runtime),
+    DATEPART(HOUR, A.runtime);
+
