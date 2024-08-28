@@ -245,3 +245,162 @@ JOIN
 
 
 
+/**********************************************************************************************/
+
+-- IOPS
+--015 Full Table Scan on Table1 with TOP 5000 rows
+SELECT TOP 5000 *
+FROM Table1 WITH (NOLOCK);
+
+-- 016 Full Table Scan on Table2 with a WHERE clause that forces full scan
+SELECT TOP 5000 *
+FROM Table2
+WHERE Price >= 0;  -- This condition will force a full scan
+
+-- 017 Join between two large tables forcing a full scan
+SELECT TOP 5000 *
+FROM Table5 t5
+JOIN Table7 t7 ON t5.OrderID = t7.ID
+WHERE t5.Price >= 0;  -- This condition will force a full scan on both tables
+
+-- 018 Cross Join between large tables forcing full scans
+SELECT TOP 5000 *
+FROM Table1 t1
+CROSS JOIN Table2 t2
+WHERE t1.Value >= 0 AND t2.Price >= 0;  -- This forces full scans on both tables
+
+-- 019 Full Table Scan on multiple tables joined together
+SELECT TOP 5000 *
+FROM Table1 t1
+JOIN Table2 t2 ON t1.ID = t2.ID
+JOIN Table3 t3 ON t2.ID = t3.ID
+JOIN Table4 t4 ON t3.ID = t4.ID
+WHERE t1.Value >= 0 AND t2.Quantity >= 0 AND t3.IsActive = 1;  -- Full scans across all tables
+
+
+---- CPU
+-- 020 Complex aggregate functions across multiple columns
+SELECT 
+    SUM(Value) AS TotalValue,
+    AVG(Value) AS AverageValue,
+    MAX(Value) AS MaxValue,
+    MIN(Value) AS MinValue,
+    STDEV(Value) AS StdDevValue
+FROM Table1;
+
+-- 021 Intensive calculation with multiple joins and aggregates
+SELECT 
+    t1.Name,
+    SUM(t1.Value * t5.Quantity) AS TotalSales,
+    AVG(t2.Price * t7.TotalAmount) AS AvgTransactionValue
+FROM Table1 t1
+JOIN Table5 t5 ON t1.ID = t5.ProductID
+JOIN Table7 t7 ON t5.OrderID = t7.ID
+JOIN Table2 t2 ON t5.ProductID = t2.ID
+GROUP BY t1.Name;
+
+-- 022 Large case statements with multiple conditions
+SELECT 
+    t1.ID,
+    CASE 
+        WHEN t1.Value > 1000 THEN 'High'
+        WHEN t1.Value > 500 THEN 'Medium'
+        ELSE 'Low'
+    END AS ValueCategory,
+    CASE 
+        WHEN t2.Quantity > 100 THEN 'Bulk'
+        WHEN t2.Quantity > 50 THEN 'Medium'
+        ELSE 'Small'
+    END AS QuantityCategory
+FROM Table1 t1
+JOIN Table2 t2 ON t1.ID = t2.ID;
+
+-- 023 Complex mathematical functions and nested aggregates
+SELECT 
+    t1.ID,
+    EXP(SQRT(POWER(SUM(t1.Value), 2))) AS ComplexMath,
+    LOG(ABS(SUM(t2.Price))) AS LogPriceSum
+FROM Table1 t1
+JOIN Table2 t2 ON t1.ID = t2.ID
+GROUP BY t1.ID;
+
+-- 024 Generating large result sets with many calculations
+SELECT TOP 10000
+    t1.ID,
+    (SUM(t1.Value) + AVG(t2.Price) * COUNT(t3.ID)) / MAX(t4.ID) AS ComputedValue
+FROM Table1 t1
+JOIN Table2 t2 ON t1.ID = t2.ID
+JOIN Table3 t3 ON t2.ID = t3.ID
+JOIN Table4 t4 ON t3.ID = t4.ID
+GROUP BY t1.ID;
+
+
+
+
+-- Memo e TEMP DB
+--  025 Large query with multiple derived tables and subqueries
+SELECT TOP 5000 *
+FROM (
+    SELECT 
+        t1.ID,
+        t1.Name,
+        SUM(t5.Quantity * t5.Price) OVER (PARTITION BY t1.ID ORDER BY t5.ID) AS RunningTotal
+    FROM Table1 t1
+    JOIN Table5 t5 ON t1.ID = t5.ProductID
+) AS SubQuery;
+
+-- 026 Large self-join with window functions
+SELECT 
+    t1.ID,
+    t1.Value,
+    LAG(t1.Value) OVER (ORDER BY t1.ID) AS PrevValue,
+    LEAD(t1.Value) OVER (ORDER BY t1.ID) AS NextValue,
+    SUM(t1.Value) OVER (ORDER BY t1.ID ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS CumulativeSum
+FROM Table1 t1;
+
+-- 027 TempDB stress with large CTE and cross joins
+WITH LargeCTE AS (
+    SELECT *
+    FROM Table2
+    WHERE Price > 0
+)
+SELECT TOP 5000 *
+FROM LargeCTE cte1
+CROSS JOIN LargeCTE cte2
+CROSS JOIN LargeCTE cte3;
+
+-- 28 Heavy usage of sorting and grouping
+SELECT 
+    t1.ID,
+    t2.Description,
+    SUM(t5.Quantity * t5.Price) AS TotalSpent,
+    AVG(t7.TotalAmount) AS AvgOrderValue
+FROM Table1 t1
+JOIN Table5 t5 ON t1.ID = t5.ProductID
+JOIN Table7 t7 ON t5.OrderID = t7.ID
+JOIN Table2 t2 ON t5.ProductID = t2.ID
+GROUP BY 
+    t1.ID, 
+    t2.Description
+ORDER BY 
+    TotalSpent DESC,
+    AvgOrderValue DESC;
+
+-- 29 Large UNION ALL queries forcing temporary result sets
+SELECT ID, Name, Value
+FROM Table1
+UNION ALL
+SELECT ID, Description AS Name, Price AS Value
+FROM Table2
+UNION ALL
+SELECT ID, Category AS Name, NULL AS Value
+FROM Table3;
+
+
+
+
+
+
+
+
+
