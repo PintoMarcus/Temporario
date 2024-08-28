@@ -397,6 +397,151 @@ SELECT ID, Category AS Name, NULL AS Value
 FROM Table3;
 
 
+/*************************************************************************/
+-- Full Table Scan com leitura de todas as colunas e agregação
+SELECT TOP 5000 *
+FROM Table1 t1
+CROSS JOIN Table2 t2
+CROSS JOIN Table3 t3
+WHERE t1.Value >= 0
+  AND t2.Quantity >= 0
+  AND t3.IsActive = 1;
+
+-- Junção pesada entre múltiplas tabelas com agregações e full scan
+SELECT TOP 5000 t1.*, t5.*, t7.*
+FROM Table1 t1
+JOIN Table5 t5 ON t1.ID = t5.ProductID
+JOIN Table7 t7 ON t5.OrderID = t7.ID
+JOIN Table6 t6 ON t7.CustomerID = t6.ID
+WHERE t1.Value >= 0 
+  AND t5.Quantity >= 0 
+  AND t6.City LIKE '%';
+
+-- Cross Join ampliado forçando leituras e processamento massivo
+SELECT TOP 5000 *
+FROM Table1 t1
+CROSS JOIN Table2 t2
+CROSS JOIN Table3 t3
+CROSS JOIN Table4 t4
+WHERE t1.Value >= 0 
+  AND t2.Quantity >= 0 
+  AND t3.IsActive = 1
+  AND t4.LastLogin IS NOT NULL;
+
+
+
+
+
+
+
+
+
+
+-- Agregações com funções matemáticas complexas em várias colunas
+SELECT 
+    SUM(Value) + LOG(SUM(Value)) * SQRT(MAX(Value)) AS TotalValue,
+    EXP(AVG(Value)) + POWER(MIN(Value), 2) AS ComputedValue,
+    COS(SIN(SUM(Value))) * TAN(SQRT(SUM(Value))) AS TrigValue
+FROM Table1;
+
+-- Operações de agregação em junções complexas com funções matemáticas
+SELECT 
+    t1.Name,
+    SUM(t1.Value * t5.Quantity) * LOG(ABS(SUM(t7.TotalAmount))) AS TotalSales,
+    AVG(POWER(t2.Price * t7.TotalAmount, 3)) AS AvgTransactionValue,
+    EXP(SUM(t1.Value)) / SUM(t5.Quantity) AS ExponentialValue
+FROM Table1 t1
+JOIN Table5 t5 ON t1.ID = t5.ProductID
+JOIN Table7 t7 ON t5.OrderID = t7.ID
+JOIN Table2 t2 ON t5.ProductID = t2.ID
+GROUP BY t1.Name;
+
+-- Complexo cálculo envolvendo subqueries e operações matemáticas
+SELECT 
+    t1.ID,
+    CASE 
+        WHEN SUM(t1.Value) > 1000 THEN EXP(SQRT(SUM(t1.Value)))
+        WHEN SUM(t1.Value) > 500 THEN LOG(SUM(t1.Value) * SUM(t1.Value))
+        ELSE POWER(SUM(t1.Value), 3)
+    END AS ComputedValue
+FROM Table1 t1
+GROUP BY t1.ID;
+
+-- Cálculos pesados utilizando várias tabelas e operações
+SELECT 
+    t1.ID,
+    (SUM(t1.Value) + AVG(t2.Price) * COUNT(t3.ID)) / MAX(t4.ID) * SUM(t5.Quantity) AS ComputedValue
+FROM Table1 t1
+JOIN Table2 t2 ON t1.ID = t2.ID
+JOIN Table3 t3 ON t2.ID = t3.ID
+JOIN Table4 t4 ON t3.ID = t4.ID
+JOIN Table5 t5 ON t1.ID = t5.ProductID
+GROUP BY t1.ID;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- CTE com grande volume de dados e subqueries
+WITH LargeCTE AS (
+    SELECT t1.*, t2.Price, t3.Category, t4.LastLogin
+    FROM Table1 t1
+    JOIN Table2 t2 ON t1.ID = t2.ID
+    JOIN Table3 t3 ON t2.ID = t3.ID
+    JOIN Table4 t4 ON t3.ID = t4.ID
+)
+SELECT TOP 10000 
+    cte1.*, 
+    cte2.*, 
+    SUM(cte1.Value * cte2.Price) OVER (PARTITION BY cte1.ID ORDER BY cte2.ID) AS RunningTotal
+FROM LargeCTE cte1
+JOIN LargeCTE cte2 ON cte1.ID = cte2.ID;
+
+-- Junção complexa de várias CTEs
+WITH CTE1 AS (
+    SELECT ID, SUM(Value) AS TotalValue
+    FROM Table1
+    GROUP BY ID
+), CTE2 AS (
+    SELECT ID, SUM(Quantity) AS TotalQuantity
+    FROM Table2
+    GROUP BY ID
+), CTE3 AS (
+    SELECT ID, SUM(TotalAmount) AS TotalAmount
+    FROM Table7
+    GROUP BY ID
+)
+SELECT TOP 10000
+    CTE1.ID,
+    CTE1.TotalValue + CTE2.TotalQuantity * CTE3.TotalAmount AS ComplexCalculation
+FROM CTE1
+JOIN CTE2 ON CTE1.ID = CTE2.ID
+JOIN CTE3 ON CTE2.ID = CTE3.ID;
+
+-- Agregações com funções de janela (window functions)
+SELECT 
+    t1.ID,
+    SUM(t1.Value) OVER (ORDER BY t1.ID ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS CumulativeSum,
+    AVG(t1.Value) OVER (ORDER BY t1.ID ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS MovingAvg,
+    MAX(t1.Value) OVER (ORDER BY t1.ID ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS MovingMax,
+    MIN(t1.Value) OVER (ORDER BY t1.ID ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS MovingMin
+FROM Table1 t1
+ORDER BY t1.ID;
 
 
 
