@@ -817,14 +817,20 @@ JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
 
 
 
+WITH NumberExtraction AS (
+    SELECT t1.name,
+           -- Remove letras e caracteres especiais deixando apenas números
+           (SELECT '' + SUBSTRING(t1.name, n, 1)
+            FROM (SELECT TOP (LEN(t1.name)) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
+                  FROM sys.all_objects) AS Numbers
+            WHERE SUBSTRING(t1.name, n, 1) LIKE '[0-9]'
+            FOR XML PATH('')) AS OnlyNumbers
+    FROM table1 t1
+)
+SELECT name, OnlyNumbers
+FROM NumberExtraction
+WHERE OnlyNumbers IS NOT NULL;
 
-SELECT 
-    REPLACE(
-        TRANSLATE(t1.name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', '00000000000000000000000000000000000000000000000000'),
-        '0', ''
-    ) AS OnlyNumbers
-FROM table1 t1
-WHERE t1.name LIKE '%[0-9]%';
 
 
 
