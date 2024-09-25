@@ -816,20 +816,90 @@ JOIN Table6 t6 ON t6.City LIKE '%çidade%'
 JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
 
 
-
-WITH NumberExtraction AS (
-    SELECT t1.name,
-           -- Remove letras e caracteres especiais deixando apenas números
+/**************************************************************************************************/
+/**************************************************************************************************/
+WITH NumberExtractionT1 AS (
+    SELECT t1.ID,
+           t1.name,
            (SELECT '' + SUBSTRING(t1.name, n, 1)
             FROM (SELECT TOP (LEN(t1.name)) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
                   FROM sys.all_objects) AS Numbers
             WHERE SUBSTRING(t1.name, n, 1) LIKE '[0-9]'
-            FOR XML PATH('')) AS OnlyNumbers
+            FOR XML PATH('')) AS OnlyNumbersT1
     FROM table1 t1
+),
+NumberExtractionT2 AS (
+    SELECT t2.ID,
+           t2.Description,
+           (SELECT '' + SUBSTRING(t2.Description, n, 1)
+            FROM (SELECT TOP (LEN(t2.Description)) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
+                  FROM sys.all_objects) AS Numbers
+            WHERE SUBSTRING(t2.Description, n, 1) LIKE '[0-9]'
+            FOR XML PATH('')) AS OnlyNumbersT2
+    FROM table2 t2
+),
+NumberExtractionT3 AS (
+    SELECT t3.ID,
+           t3.Category,
+           (SELECT '' + SUBSTRING(t3.Category, n, 1)
+            FROM (SELECT TOP (LEN(t3.Category)) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
+                  FROM sys.all_objects) AS Numbers
+            WHERE SUBSTRING(t3.Category, n, 1) LIKE '[0-9]'
+            FOR XML PATH('')) AS OnlyNumbersT3
+    FROM table3 t3
+),
+NumberExtractionT4 AS (
+    SELECT t4.ID,
+           t4.Username,
+           (SELECT '' + SUBSTRING(t4.Username, n, 1)
+            FROM (SELECT TOP (LEN(t4.Username)) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
+                  FROM sys.all_objects) AS Numbers
+            WHERE SUBSTRING(t4.Username, n, 1) LIKE '[0-9]'
+            FOR XML PATH('')) AS OnlyNumbersT4
+    FROM table4 t4
+),
+NumberExtractionT6 AS (
+    SELECT t6.ID,
+           t6.Address,
+           (SELECT '' + SUBSTRING(t6.Address, n, 1)
+            FROM (SELECT TOP (LEN(t6.Address)) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
+                  FROM sys.all_objects) AS Numbers
+            WHERE SUBSTRING(t6.Address, n, 1) LIKE '[0-9]'
+            FOR XML PATH('')) AS OnlyNumbersT6
+    FROM table6 t6
+),
+NumberExtractionT8 AS (
+    SELECT t8.ID,
+           t8.ProductName,
+           (SELECT '' + SUBSTRING(t8.ProductName, n, 1)
+            FROM (SELECT TOP (LEN(t8.ProductName)) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
+                  FROM sys.all_objects) AS Numbers
+            WHERE SUBSTRING(t8.ProductName, n, 1) LIKE '[0-9]'
+            FOR XML PATH('')) AS OnlyNumbersT8
+    FROM table8 t8
 )
-SELECT name, OnlyNumbers
-FROM NumberExtraction
-WHERE OnlyNumbers IS NOT NULL;
+-- Realiza o JOIN entre todas as tabelas usando os números extraídos
+SELECT 
+    t1.ID AS ID_T1, t1.name AS Name, 
+    t2.ID AS ID_T2, t2.Description AS Description, 
+    t3.ID AS ID_T3, t3.Category AS Category,
+    t4.ID AS ID_T4, t4.Username AS Username,
+    t6.ID AS ID_T6, t6.Address AS Address,
+    t8.ID AS ID_T8, t8.ProductName AS ProductName
+FROM NumberExtractionT1 t1
+JOIN NumberExtractionT2 t2 ON t1.OnlyNumbersT1 = t2.OnlyNumbersT2
+JOIN NumberExtractionT3 t3 ON t2.OnlyNumbersT2 = t3.OnlyNumbersT3
+JOIN NumberExtractionT4 t4 ON t3.OnlyNumbersT3 = t4.OnlyNumbersT4
+JOIN NumberExtractionT6 t6 ON t4.OnlyNumbersT4 = t6.OnlyNumbersT6
+JOIN NumberExtractionT8 t8 ON t6.OnlyNumbersT6 = t8.OnlyNumbersT8
+WHERE t1.OnlyNumbersT1 IS NOT NULL
+  AND t2.OnlyNumbersT2 IS NOT NULL
+  AND t3.OnlyNumbersT3 IS NOT NULL
+  AND t4.OnlyNumbersT4 IS NOT NULL
+  AND t6.OnlyNumbersT6 IS NOT NULL
+  AND t8.OnlyNumbersT8 IS NOT NULL;
+
+
 
 
 
