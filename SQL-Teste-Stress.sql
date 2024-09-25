@@ -818,6 +818,13 @@ JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
 
 
 
+SELECT 
+    REPLACE(
+        TRANSLATE(t1.name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', '00000000000000000000000000000000000000000000000000'),
+        '0', ''
+    ) AS OnlyNumbers
+FROM table1 t1
+WHERE t1.name LIKE '%[0-9]%';
 
 
 
