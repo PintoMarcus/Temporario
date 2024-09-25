@@ -545,6 +545,282 @@ ORDER BY t1.ID;
 
 
 
+----------------------------------------------------------------------------------------------------------
+SELECT CONCAT(t1.Name, ' - ', t3.CreatedBy) AS UserInfo, 
+       CONVERT(VARCHAR, t1.DateCreated, 23) AS DateCreatedFormatted, 
+       t2.Description
+FROM Table1 t1
+JOIN Table3 t3 ON t1.Name LIKE '%única%' AND t3.CreatedBy LIKE '%usuário%'
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%';
+
+
+
+
+SELECT UPPER(t4.Username) AS UpperUsername, 
+       RTRIM(t6.City) AS TrimmedCity, 
+       t6.State, 
+       t8.ProductName
+FROM Table4 t4
+JOIN Table6 t6 ON t4.Username LIKE '%usuário%' AND t6.City LIKE '%çidade%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+SELECT SUBSTRING(t2.Description, 1, 15) AS ShortDescription, 
+       LTRIM(t6.Address) AS TrimmedAddress, 
+       t1.Name, 
+       t3.Category
+FROM Table2 t2
+JOIN Table6 t6 ON t6.Address LIKE '%endereço%'
+JOIN Table1 t1 ON t1.Name LIKE '%única%'
+JOIN Table3 t3 ON t3.Category LIKE '%categoría%';
+
+
+
+SELECT LOWER(t1.Name) AS LowerName, 
+       COALESCE(t4.LastLogin, '1900-01-01') AS LastLogin, 
+       t8.ProductName
+FROM Table1 t1
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%' 
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+SELECT LEFT(t1.Name, 10) AS LeftName, 
+       RIGHT(t3.CreatedBy, 5) AS RightCreatedBy, 
+       t2.Description
+FROM Table1 t1
+JOIN Table3 t3 ON t3.CreatedBy LIKE '%usuário%'
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%';
+
+
+
+
+
+SELECT UPPER(t6.City) AS CityUpper, 
+       CAST(t6.ZipCode AS VARCHAR(10)) AS ZipCodeFormatted, 
+       t1.Name, 
+       t8.ProductName
+FROM Table6 t6
+JOIN Table1 t1 ON t1.Name LIKE '%única%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+
+SELECT CONVERT(VARCHAR, t1.Value, 2) AS FormattedValue, 
+       COALESCE(t4.Username, 'Unknown') AS Username, 
+       t6.City
+FROM Table1 t1
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.City LIKE '%çidade%';
+
+
+
+
+
+
+SELECT LTRIM(RTRIM(t6.Address)) AS FullAddress, 
+       CAST(t2.Price AS DECIMAL(18, 2)) AS FormattedPrice, 
+       t3.CreatedBy, 
+       t1.Name
+FROM Table6 t6
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table3 t3 ON t3.CreatedBy LIKE '%usuário%'
+JOIN Table1 t1 ON t1.Name LIKE '%única%';
+
+
+
+
+
+
+SELECT SUBSTRING(t4.Username, 1, 5) AS UserInitials, 
+       LEFT(t8.ProductName, 10) AS ShortProductName, 
+       t3.Category
+FROM Table4 t4
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%'
+JOIN Table3 t3 ON t3.Category LIKE '%categoría%';
+
+
+
+
+
+SELECT RIGHT(t6.State, 3) AS ShortState, 
+       CONCAT(t1.Name, ' - ', t2.Description) AS NameDescription, 
+       t4.Username
+FROM Table6 t6
+JOIN Table1 t1 ON t1.Name LIKE '%única%'
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%';
+
+
+
+
+SELECT t1.Name, 
+       CONVERT(VARCHAR(10), t1.DateCreated, 120) AS DateCreatedFormatted, 
+       COALESCE(t6.Address, 'No Address') AS Address
+FROM Table1 t1
+JOIN Table6 t6 ON t6.Address LIKE '%endereço%'
+WHERE t1.Name LIKE '%única%';
+
+
+
+
+
+SELECT UPPER(t3.Category) AS CategoryUpper, 
+       SUBSTRING(t4.Username, 1, 3) AS UserInitials, 
+       RTRIM(t6.City) AS CityTrimmed
+FROM Table3 t3
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.City LIKE '%çidade%';
+
+
+
+
+SELECT LTRIM(t2.Description) AS DescriptionTrimmed, 
+       RIGHT(t6.ZipCode, 5) AS ZipShort, 
+       CAST(t8.StockQuantity AS VARCHAR(10)) AS StockQtyStr
+FROM Table2 t2
+JOIN Table6 t6 ON t6.ZipCode LIKE '%zíp%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+SELECT CONCAT(t1.Name, ' - ', COALESCE(t2.Description, 'No Description')) AS FullDescription, 
+       UPPER(t6.City) AS CityUpper
+FROM Table1 t1
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table6 t6 ON t6.City LIKE '%çidade%';
+
+
+
+
+SELECT LEFT(t3.Category, 5) AS ShortCategory, 
+       CONVERT(VARCHAR(10), t4.LastLogin, 23) AS LastLoginFormatted, 
+       LOWER(t8.ProductName) AS ProductLower
+FROM Table3 t3
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+
+SELECT CONCAT(t1.Name, ' - ', t3.Category) AS NameCategory,
+       LTRIM(RTRIM(t4.Username)) AS TrimmedUsername,
+       t2.Description, 
+       t6.City, 
+       t8.ProductName
+FROM Table1 t1
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table3 t3 ON t3.Category LIKE '%categoría%'
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.City LIKE '%çidade%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+SELECT UPPER(t1.Name) AS UpperName, 
+       LOWER(t3.CreatedBy) AS LowerCreatedBy, 
+       SUBSTRING(t2.Description, 1, 10) AS ShortDescription, 
+       t4.Username, 
+       t6.Address, 
+       t8.ProductName
+FROM Table1 t1
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table3 t3 ON t3.CreatedBy LIKE '%usuário%'
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.Address LIKE '%endereço%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+SELECT LEFT(t1.Name, 5) AS LeftName, 
+       RIGHT(t4.Username, 4) AS RightUsername, 
+       COALESCE(t6.State, 'Unknown State') AS State, 
+       t2.Description, 
+       t3.Category, 
+       t8.ProductName
+FROM Table1 t1
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table3 t3 ON t3.Category LIKE '%categoría%'
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.State LIKE '%estádo%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+SELECT CONVERT(VARCHAR(10), t1.Value, 1) AS FormattedValue, 
+       CAST(t6.ZipCode AS VARCHAR(10)) AS ZipCodeFormatted, 
+       LTRIM(t4.Username) AS TrimmedUsername, 
+       t3.Category, 
+       t2.Description, 
+       t8.ProductName
+FROM Table1 t1
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table3 t3 ON t3.Category LIKE '%categoría%'
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.ZipCode LIKE '%zíp%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+SELECT CONCAT(t4.Username, ' - ', t3.CreatedBy) AS UserCreatedBy, 
+       UPPER(t6.City) AS CityUpper, 
+       LTRIM(t2.Description) AS TrimmedDescription, 
+       t1.Name, 
+       t8.ProductName
+FROM Table1 t1
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table3 t3 ON t3.CreatedBy LIKE '%usuário%'
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.City LIKE '%çidade%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+
+SELECT RTRIM(t6.Address) AS TrimmedAddress, 
+       SUBSTRING(t2.Description, 1, 15) AS ShortDescription, 
+       COALESCE(t3.Category, 'No Category') AS Category, 
+       t1.Name, 
+       t4.Username, 
+       t8.ProductName
+FROM Table1 t1
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table3 t3 ON t3.Category LIKE '%categoría%'
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.Address LIKE '%endereço%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+SELECT LOWER(t3.CreatedBy) AS CreatedByLower, 
+       LEFT(t1.Name, 7) AS ShortName, 
+       CONVERT(VARCHAR, t4.LastLogin, 23) AS LastLoginFormatted, 
+       t2.Description, 
+       t6.City, 
+       t8.ProductName
+FROM Table1 t1
+JOIN Table2 t2 ON t2.Description LIKE '%descrição%'
+JOIN Table3 t3 ON t3.CreatedBy LIKE '%usuário%'
+JOIN Table4 t4 ON t4.Username LIKE '%usuário%'
+JOIN Table6 t6 ON t6.City LIKE '%çidade%'
+JOIN Table8 t8 ON t8.ProductName LIKE '%prodúto%';
+
+
+
+
+
+
+
 
 
 
